@@ -1,2 +1,0 @@
-# resumeProject
-private project 
