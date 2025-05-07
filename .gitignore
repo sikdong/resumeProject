@@ -1,3 +1,12 @@
+Docker/mysql_data/
+# 모든 파일/폴더 무시
+/*
+
+# main 폴더만 추적
+!src/
+!src/main/
+!src/main/**
+
 # Compiled class file
 *.class
 
