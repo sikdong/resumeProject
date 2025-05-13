@@ -4,6 +4,8 @@ Docker/mysql_data/
 *.yml
 *.iml
 .idea/
+.gradle/
+build/
 
 # main 폴더만 추적
 !src/

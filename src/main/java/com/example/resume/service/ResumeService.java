@@ -1,7 +1,9 @@
 package com.example.resume.service;
 
+import com.example.resume.domain.Evaluation;
 import com.example.resume.domain.Resume;
 import com.example.resume.domain.User;
+import com.example.resume.dto.EvaluationResponseDto;
 import com.example.resume.dto.ResumeResponseDto;
 import com.example.resume.dto.ResumeUploadRequestDto;
 import com.example.resume.repository.ResumeRepository;
@@ -9,6 +11,7 @@ import com.example.resume.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,8 +21,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
 @Service
@@ -44,22 +45,6 @@ public class ResumeService {
         resumeRepository.save(resume);
     }
 
-    // 이력서 리스트 조회
-    public List<ResumeResponseDto> getResumesByUser(Long userId) {
-        return resumeRepository.findByUserId(userId)
-                .stream()
-                .map(ResumeResponseDto::fromEntity)
-                .collect(toList());
-    }
-
-    // 이력서 평가 점수 등록
-    public Resume evaluateResume(Long resumeId, int score) {
-        Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
-        resume.setScore(score);
-        return resumeRepository.save(resume);
-    }
-
     private String saveFile(ResumeUploadRequestDto request, byte[] decodedBytes) {
         try {
             String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
@@ -73,7 +58,41 @@ public class ResumeService {
             throw new RuntimeException("파일 저장에 실패했습니다.", e);
         }
     }
+    @Transactional(readOnly = true)
+    public ResumeResponseDto getResumeById(Long resumeId) {
+        Resume resume = resumeRepository.findByIdWithEvaluation(resumeId)
+                .orElseThrow(() -> new IllegalArgumentException("no resume"));
 
+        List<Evaluation> evaluations = resume.getEvaluations();
 
+        List<EvaluationResponseDto> evaluationDtos = evaluations.stream()
+                .map(EvaluationResponseDto::fromEntity)
+                .toList();
 
+        double averageScore = getAverageScore(evaluations);
+        int commentSize = getCommentSize(evaluations);
+
+        return new ResumeResponseDto(
+                resumeId,
+                resume.getTitle(),
+                resume.getFileUrl(),
+                resume.getCreatedAt(),
+                averageScore,
+                commentSize,
+                evaluationDtos
+        );
+    }
+
+    private int getCommentSize(List<Evaluation> evaluations) {
+        return (int) evaluations.stream()
+                .filter(e -> e.getComment() != null && !e.getComment().isBlank())
+                .count();
+    }
+
+    private double getAverageScore(List<Evaluation> evaluations) {
+        return evaluations.stream()
+                .mapToDouble(Evaluation::getScore)
+                .average()
+                .orElse(0.0); // 평가가 없을 경우 평균 점수 0.0
+    }
 }

@@ -25,7 +25,7 @@ public class User {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Resume> resumes;
 
     @OneToMany(mappedBy = "evaluator")

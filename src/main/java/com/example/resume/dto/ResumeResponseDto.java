@@ -1,26 +1,16 @@
 package com.example.resume.dto;
 
-import com.example.resume.domain.Resume;
-import com.example.resume.domain.User;
-
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ResumeResponseDto(
         Long id,
         String title,
         String fileUrl,
         LocalDateTime createAt,
-        Integer score,
-        User user
+        Double averageScore,
+        int commentSize,
+        List<EvaluationResponseDto> evaluations
 ) {
-    public static ResumeResponseDto fromEntity(Resume resume) {
-        return new ResumeResponseDto(
-                resume.getId(),
-                resume.getTitle(),
-                resume.getFileUrl(),
-                resume.getCreatedAt(),
-                resume.getScore(),
-                resume.getUser()
-        );
-    }
+
 }

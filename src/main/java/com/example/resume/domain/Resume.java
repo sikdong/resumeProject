@@ -19,14 +19,12 @@ public class Resume {
 
     private LocalDateTime updatedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "resume")
+    @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
     private List<Evaluation> evaluations;
-
-    private Integer score;
 
     @PrePersist
     public void onCreate() {
@@ -37,6 +35,11 @@ public class Resume {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public User getUser() {
+        System.out.println("🔥 getUser() called!");
+        return user;
     }
 }
 
