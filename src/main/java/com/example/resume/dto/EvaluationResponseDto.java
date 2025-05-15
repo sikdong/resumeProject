@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record EvaluationResponseDto(
         Long id,
-        Integer score,
+        Double score,
         LocalDateTime evaluatedAt,
         String comment
 ) {
