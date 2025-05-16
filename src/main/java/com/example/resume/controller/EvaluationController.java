@@ -2,7 +2,6 @@ package com.example.resume.controller;
 
 import com.example.resume.dto.EvaluationRequestDto;
 import com.example.resume.service.EvaluationService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +17,7 @@ public class EvaluationController {
     public ResponseEntity<Void> evaluate(
             @PathVariable Long resumeId,
             @RequestBody EvaluationRequestDto evaluationRequestDto){
-        //FIXME TEMP
-        evaluationService.evaluate(1L, evaluationRequestDto);
-        //evaluationService.evaluate(resumeId, evaluationRequestDto);
+        evaluationService.evaluate(resumeId, evaluationRequestDto);
         return ResponseEntity.ok().build();
     }
 }
