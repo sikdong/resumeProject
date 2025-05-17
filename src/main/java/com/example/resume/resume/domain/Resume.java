@@ -1,4 +1,6 @@
-package com.example.resume.domain;
+package com.example.resume.resume.domain;
+import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

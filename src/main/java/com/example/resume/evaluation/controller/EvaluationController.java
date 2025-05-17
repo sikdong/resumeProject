@@ -1,7 +1,7 @@
-package com.example.resume.controller;
+package com.example.resume.evaluation.controller;
 
-import com.example.resume.dto.EvaluationRequestDto;
-import com.example.resume.service.EvaluationService;
+import com.example.resume.evaluation.dto.EvaluationRequestDto;
+import com.example.resume.evaluation.service.EvaluationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

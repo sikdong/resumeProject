@@ -1,10 +1,10 @@
-package com.example.resume.service;
+package com.example.resume.evaluation.service;
 
-import com.example.resume.domain.Evaluation;
-import com.example.resume.domain.Resume;
-import com.example.resume.dto.EvaluationRequestDto;
-import com.example.resume.repository.EvaluationRepository;
-import com.example.resume.repository.ResumeRepository;
+import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.resume.domain.Resume;
+import com.example.resume.evaluation.dto.EvaluationRequestDto;
+import com.example.resume.evaluation.repository.EvaluationRepository;
+import com.example.resume.resume.repository.ResumeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

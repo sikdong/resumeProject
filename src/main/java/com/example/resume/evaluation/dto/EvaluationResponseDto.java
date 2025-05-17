@@ -1,6 +1,6 @@
-package com.example.resume.dto;
+package com.example.resume.evaluation.dto;
 
-import com.example.resume.domain.Evaluation;
+import com.example.resume.evaluation.domain.Evaluation;
 
 import java.time.LocalDateTime;
 

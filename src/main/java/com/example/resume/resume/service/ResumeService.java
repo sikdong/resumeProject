@@ -1,13 +1,13 @@
-package com.example.resume.service;
+package com.example.resume.resume.service;
 
-import com.example.resume.domain.Evaluation;
-import com.example.resume.domain.Resume;
-import com.example.resume.domain.User;
-import com.example.resume.dto.EvaluationResponseDto;
-import com.example.resume.dto.ResumeResponseDto;
-import com.example.resume.dto.ResumeUploadRequestDto;
-import com.example.resume.repository.ResumeRepository;
-import com.example.resume.repository.UserRepository;
+import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.resume.domain.Resume;
+import com.example.resume.user.domain.User;
+import com.example.resume.evaluation.dto.EvaluationResponseDto;
+import com.example.resume.resume.dto.ResumeResponseDto;
+import com.example.resume.resume.dto.ResumeUploadRequestDto;
+import com.example.resume.resume.repository.ResumeRepository;
+import com.example.resume.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

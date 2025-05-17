@@ -1,4 +1,6 @@
-package com.example.resume.dto;
+package com.example.resume.resume.dto;
+
+import com.example.resume.evaluation.dto.EvaluationResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

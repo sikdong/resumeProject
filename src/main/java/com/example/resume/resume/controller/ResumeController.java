@@ -1,8 +1,8 @@
-package com.example.resume.controller;
+package com.example.resume.resume.controller;
 
-import com.example.resume.dto.ResumeResponseDto;
-import com.example.resume.dto.ResumeUploadRequestDto;
-import com.example.resume.service.ResumeService;
+import com.example.resume.resume.dto.ResumeResponseDto;
+import com.example.resume.resume.dto.ResumeUploadRequestDto;
+import com.example.resume.resume.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

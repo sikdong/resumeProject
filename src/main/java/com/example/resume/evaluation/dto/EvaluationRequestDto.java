@@ -1,4 +1,4 @@
-package com.example.resume.dto;
+package com.example.resume.evaluation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

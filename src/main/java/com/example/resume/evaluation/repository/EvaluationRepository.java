@@ -1,6 +1,6 @@
-package com.example.resume.repository;
+package com.example.resume.evaluation.repository;
 
-import com.example.resume.domain.Evaluation;
+import com.example.resume.evaluation.domain.Evaluation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

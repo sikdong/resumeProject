@@ -1,4 +1,4 @@
-package com.example.resume.dto;
+package com.example.resume.user.dto;
 
 public record UserDto(
         Long id,

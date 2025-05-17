@@ -1,4 +1,4 @@
-package com.example.resume.dto;
+package com.example.resume.resume.dto;
 
 public record ResumeUploadRequestDto(
         String fileName,
