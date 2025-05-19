@@ -1,5 +1,6 @@
 package com.example.resume.user.domain;
 
+import com.example.resume.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.resume.domain.Resume;
 import jakarta.persistence.*;
@@ -24,6 +25,12 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private CareerLevel careerLevel;
+
+    @Column(name = "job_title")
+    private String jobTitle;
 
     private LocalDateTime createdAt;
 
