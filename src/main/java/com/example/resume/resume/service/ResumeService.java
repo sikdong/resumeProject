@@ -10,6 +10,7 @@ import com.example.resume.resume.repository.ResumeRepository;
 import com.example.resume.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,6 +67,10 @@ public class ResumeService {
 
         List<Evaluation> evaluations = resume.getEvaluations();
 
+        return getResumeResponseDto(evaluations, resume);
+    }
+
+    private ResumeResponseDto getResumeResponseDto(List<Evaluation> evaluations, Resume resume) {
         List<EvaluationResponseDto> evaluationDtos = evaluations.stream()
                 .map(EvaluationResponseDto::fromEntity)
                 .toList();
@@ -73,7 +79,7 @@ public class ResumeService {
         int commentSize = getCommentSize(evaluations);
 
         return new ResumeResponseDto(
-                resumeId,
+                resume.getId(),
                 resume.getTitle(),
                 resume.getFileUrl(),
                 resume.getCreatedAt(),
@@ -93,6 +99,16 @@ public class ResumeService {
         return evaluations.stream()
                 .mapToDouble(Evaluation::getScore)
                 .average()
-                .orElse(0.0); // 평가가 없을 경우 평균 점수 0.0
+                .orElse(0.0);
+    }
+
+    public List<ResumeResponseDto> getAllResumes() {
+        List<ResumeResponseDto> resumeResponseDtos = new ArrayList<>();
+        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
+        for (Resume resume : resumesWithEvaluation) {
+            List<Evaluation> evaluations = resume.getEvaluations();
+            resumeResponseDtos.add(getResumeResponseDto(evaluations, resume));
+        }
+        return resumeResponseDtos;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/resumes")
@@ -35,5 +36,11 @@ public class ResumeController {
     public ResponseEntity<ResumeResponseDto> getResume (@PathVariable Long resumeId) {
         ResumeResponseDto resumeResponseDto = resumeService.getResumeById(resumeId);
         return ResponseEntity.ok(resumeResponseDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ResumeResponseDto>> getAllResumes () {
+        List<ResumeResponseDto> resumeResponseDtos = resumeService.getAllResumes();
+        return ResponseEntity.ok(resumeResponseDtos);
     }
 }
