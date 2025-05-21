@@ -1,5 +1,6 @@
-package com.example.resume.security;
+package com.example.resume.common.auth;
 
+import com.example.resume.user.domain.User;
 import com.example.resume.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +18,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return null;
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        return new CustomUserDetails(user);
     }
 }
 
