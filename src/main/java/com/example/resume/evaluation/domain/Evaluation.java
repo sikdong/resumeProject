@@ -24,7 +24,7 @@ public class Evaluation {
     @JoinColumn(name = "resume_id")
     private Resume resume;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evaluator_id")
     private User evaluator;
 
