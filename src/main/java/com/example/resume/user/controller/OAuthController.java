@@ -34,12 +34,10 @@ public class OAuthController {
     @GetMapping("/success")
     public void oauthSuccess(HttpServletResponse response,
                              @AuthenticationPrincipal OAuth2User principal) throws IOException {
-
         User user = userService.getUser(principal);
         String redirectUrl = userService.getRedirectUrl(response, user);
 
-        String token = jwtUtil.createToken(user.getEmail());
-
+        String token = jwtUtil.createToken(user);
         redirectUrl += "?token=" + token;
 
         response.sendRedirect(redirectUrl);
