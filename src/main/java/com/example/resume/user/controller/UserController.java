@@ -1,5 +1,6 @@
 package com.example.resume.user.controller;
 
+import com.example.resume.common.auth.CustomUserDetails;
 import com.example.resume.user.dto.UserAdditionalInfoRequestDto;
 import com.example.resume.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,11 +22,9 @@ public class UserController {
 
     @PostMapping("/additional-info")
     public ResponseEntity<?> updateInfo(@RequestBody UserAdditionalInfoRequestDto request,
-                                        @AuthenticationPrincipal OAuth2User principal,
-                                     HttpServletResponse response){
-        System.out.println(principal);
-        String username = "";
-        userService.update(request, response, username);
+                                        @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long userId = userDetails.user().getId();
+        userService.update(request, userId);
         return ResponseEntity.ok().build();
     }
 }

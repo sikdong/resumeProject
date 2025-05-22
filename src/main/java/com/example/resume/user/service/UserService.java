@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,11 +33,15 @@ public class UserService {
                 .orElseGet(()->userRepository.save(User.builder()
                         .name(principal.getAttribute("name"))
                         .provider("google")
+                        .role(User.Role.USER)
                         .email(email)
                         .build()));
     }
-
-    public void update(UserAdditionalInfoRequestDto request, HttpServletResponse response, String username) {
-
+    @Transactional
+    public void update(UserAdditionalInfoRequestDto request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User with id " + userId + " not found"));
+        user.setCareerLevel(CareerLevel.valueOf(request.careerLevel()));
+        user.setJobTitle(request.jobTitle());
     }
 }
