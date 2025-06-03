@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
-public class User {
+public class Member {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -34,7 +34,7 @@ public class User {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Resume> resumes;
 
     @OneToMany(mappedBy = "evaluator")

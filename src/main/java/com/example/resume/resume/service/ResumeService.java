@@ -2,7 +2,7 @@ package com.example.resume.resume.service;
 
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.resume.domain.Resume;
-import com.example.resume.user.domain.User;
+import com.example.resume.user.domain.Member;
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.resume.dto.ResumeResponseDto;
 import com.example.resume.resume.dto.ResumeUploadRequestDto;
@@ -10,7 +10,6 @@ import com.example.resume.resume.repository.ResumeRepository;
 import com.example.resume.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,18 +28,18 @@ import java.util.UUID;
 @Slf4j
 public class ResumeService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final ResumeRepository resumeRepository;
 
     private static final String UPLOAD_DIR = "/uploads/";
 
     public void uploadResume(Long userId, ResumeUploadRequestDto request, byte[] decodedContent) {
-        User user = userRepository.findById(userId)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         String fileUrl = saveFile(request, decodedContent);
         log.info("fileUrl === {}", fileUrl);
         Resume resume = Resume.builder()
-                .user(user)
+                .member(member)
                 .title(request.title())
                 .fileUrl(fileUrl)
                 .build();

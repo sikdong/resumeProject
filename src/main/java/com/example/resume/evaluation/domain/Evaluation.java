@@ -1,6 +1,6 @@
 package com.example.resume.evaluation.domain;
 
-import com.example.resume.user.domain.User;
+import com.example.resume.user.domain.Member;
 import com.example.resume.resume.domain.Resume;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +26,7 @@ public class Evaluation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evaluator_id")
-    private User evaluator;
+    private Member evaluator;
 
     @PrePersist
     public void onCreate() {

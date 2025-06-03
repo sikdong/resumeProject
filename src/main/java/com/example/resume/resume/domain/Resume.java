@@ -1,6 +1,6 @@
 package com.example.resume.resume.domain;
 import com.example.resume.evaluation.domain.Evaluation;
-import com.example.resume.user.domain.User;
+import com.example.resume.user.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -23,7 +23,7 @@ public class Resume {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private Member member;
 
     @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
     private List<Evaluation> evaluations;
@@ -39,9 +39,9 @@ public class Resume {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public User getUser() {
+    public Member getMember() {
         System.out.println("🔥 getUser() called!");
-        return user;
+        return member;
     }
 }
 
