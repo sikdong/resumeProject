@@ -10,7 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EvaluationRequestDto {
-    private Long resumeId;
     private Double score;
     private String comment;
 }
