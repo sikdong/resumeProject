@@ -5,7 +5,6 @@ import com.example.resume.common.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,15 +19,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http,
                                               JwtAuthenticationFilter jwtFilter) throws Exception {
         http
                 .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/resumes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/resumes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/token/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.disable())
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
@@ -38,7 +40,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     /*@Bean
     @Order(1)
@@ -58,7 +59,6 @@ public class SecurityConfig {
 
 
     @Bean
-    @Order(2)
     public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)

@@ -3,18 +3,21 @@ package com.example.resume.common.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import com.example.resume.user.domain.User;
+import com.example.resume.user.domain.Member;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private final long expirationTime = 1000 * 60 * 60;
+    private final Duration accessExpirationTime = Duration.ofHours(3);
+    private final Duration refreshExpirationTime = Duration.ofDays(7);
 
     private final Algorithm algorithm;
 
@@ -25,17 +28,25 @@ public class JwtUtil {
         this.algorithm = Algorithm.HMAC256(secretKey);
     }
 
-    public String createToken(User user) {
+    public String createAccessToken(Member member) {
         return JWT.create()
-                .withSubject(user.getEmail())
-                .withClaim("id", user.getId())
-                .withClaim("name", user.getName())
+                .withSubject(member.getEmail())
+                .withClaim("id", member.getId().toString())
+                .withClaim("name", member.getName())
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + expirationTime))
+                .withExpiresAt(new Date(System.currentTimeMillis() + accessExpirationTime.toMillis()))
                 .sign(algorithm);
     }
 
-    public String extractUsername(String token) {
+    public String createRefreshToken(Member member) {
+        return JWT.create()
+                .withSubject(member.getId().toString())
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + refreshExpirationTime.toMillis()))
+                .sign(algorithm);
+    }
+
+    public String extractMemberId(String token) {
         return decodeToken(token).getSubject();
     }
 
@@ -48,9 +59,15 @@ public class JwtUtil {
         }
     }
 
-    public Long getUserId(String token) {
+    public String getUserId(String token) {
         DecodedJWT jwt = getVerifier().verify(token);
-        return jwt.getClaim("id").asLong();
+        Claim idClaim = jwt.getClaim("id");
+        if (idClaim.asString() != null) {
+            return idClaim.asString();
+        } else if (idClaim.asInt() != null) {
+            return String.valueOf(idClaim.asInt());
+        }
+        return null;
     }
 
     private DecodedJWT decodeToken(String token) {
