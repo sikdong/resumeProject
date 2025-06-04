@@ -26,6 +26,7 @@ public class Resume {
     private Member member;
 
     @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
     private List<Evaluation> evaluations;
 
     @PrePersist
@@ -39,9 +40,5 @@ public class Resume {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Member getMember() {
-        System.out.println("🔥 getUser() called!");
-        return member;
-    }
 }
 

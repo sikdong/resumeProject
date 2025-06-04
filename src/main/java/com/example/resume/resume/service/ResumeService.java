@@ -7,7 +7,8 @@ import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.resume.dto.ResumeResponseDto;
 import com.example.resume.resume.dto.ResumeUploadRequestDto;
 import com.example.resume.resume.repository.ResumeRepository;
-import com.example.resume.user.repository.UserRepository;
+import com.example.resume.user.dto.MemberDto;
+import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -65,10 +66,29 @@ public class ResumeService {
                 .orElseThrow(() -> new IllegalArgumentException("no resume"));
 
         List<Evaluation> evaluations = resume.getEvaluations();
-
         return getResumeResponseDto(evaluations, resume);
     }
 
+    public List<ResumeResponseDto> getAllResumes() {
+        List<ResumeResponseDto> resumeResponseDtos = new ArrayList<>();
+        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
+        for (Resume resume : resumesWithEvaluation) {
+            List<Evaluation> evaluations = resume.getEvaluations();
+            Member member = resume.getMember();
+            MemberDto memberDto = MemberDto.fromEntity(member);
+            ResumeResponseDto resumeResponseDto = getResumeResponseDto(evaluations, resume);
+            resumeResponseDto.setMember(memberDto);
+            resumeResponseDtos.add(resumeResponseDto);
+        }
+        return resumeResponseDtos;
+    }
+
+    public Path getFilePath(Long fileId) {
+        Resume resume = resumeRepository.findById(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("no resume"));
+        String fileUrl = resume.getFileUrl();
+        return Paths.get(fileUrl);
+    }
     private ResumeResponseDto getResumeResponseDto(List<Evaluation> evaluations, Resume resume) {
         List<EvaluationResponseDto> evaluationDtos = evaluations.stream()
                 .map(EvaluationResponseDto::fromEntity)
@@ -95,19 +115,10 @@ public class ResumeService {
     }
 
     private double getAverageScore(List<Evaluation> evaluations) {
-        return evaluations.stream()
+        double average = evaluations.stream()
                 .mapToDouble(Evaluation::getScore)
                 .average()
                 .orElse(0.0);
-    }
-
-    public List<ResumeResponseDto> getAllResumes() {
-        List<ResumeResponseDto> resumeResponseDtos = new ArrayList<>();
-        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
-        for (Resume resume : resumesWithEvaluation) {
-            List<Evaluation> evaluations = resume.getEvaluations();
-            resumeResponseDtos.add(getResumeResponseDto(evaluations, resume));
-        }
-        return resumeResponseDtos;
+        return Math.round(average * 10) / 10.0;
     }
 }
