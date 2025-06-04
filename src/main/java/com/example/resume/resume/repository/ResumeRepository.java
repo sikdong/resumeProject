@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
-    List<Resume> findByUserId(Long userId);
+    List<Resume> findByMemberId(Long userId);
 
     @Query("SELECT r FROM Resume r LEFT JOIN FETCH r.evaluations WHERE r.id = :resumeId")
     Optional<Resume> findByIdWithEvaluation(@Param("resumeId") Long resumeId);

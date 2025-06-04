@@ -22,7 +22,7 @@ public class Resume {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)

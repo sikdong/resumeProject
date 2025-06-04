@@ -25,7 +25,7 @@ public class Evaluation {
     private Resume resume;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evaluator_id")
+    @JoinColumn(name = "member_id")
     private Member evaluator;
 
     @PrePersist

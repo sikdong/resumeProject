@@ -28,7 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OAuthController {
 
-    private final UserService userService;
+    private final MemberService memberService;
     private final JwtUtil jwtUtil;
 
     @GetMapping("/success")
