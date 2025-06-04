@@ -13,8 +13,9 @@ public class CorsGlobalConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*") // 배포 시 Appsmith 도메인만 지정
-                        .allowedMethods("*");
+                        .allowedOrigins("https://app.appsmith.com")
+                        .allowedMethods("*")
+                        .allowCredentials(true);
             }
         };
     }
