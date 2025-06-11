@@ -10,21 +10,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
-    private static final String ADDITIONAL_FORM_URL = "https://app.appsmith.com/app/wishy/page-683034089371250ed3aefc54/edit";
-    private static final String MAIN_PAGE = "https://app.appsmith.com/app/wishy/page-683034089371250ed3aefc55/edit";
+    @Value("${app.url.additional-form}")
+    private String additionalFormUrl;
+
+    @Value("${app.url.main-page}")
+    private String mainPageUrl;
 
     public String getRedirectUrl(HttpServletResponse response, Member member) {
         CareerLevel careerLevel = member.getCareerLevel();
         String jobTitle = member.getJobTitle();
         if (careerLevel == null && StringUtils.isEmpty(jobTitle)){
-            return ADDITIONAL_FORM_URL;
+            return additionalFormUrl;
         }
-        return MAIN_PAGE;
+        return mainPageUrl;
     }
 
     public Member getUser(OAuth2User principal) {
