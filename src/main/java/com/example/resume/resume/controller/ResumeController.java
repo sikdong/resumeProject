@@ -30,15 +30,10 @@ import java.util.List;
 public class ResumeController {
     private final ResumeService resumeService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadResume (
-            @RequestBody ResumeUploadRequestDto request,
-            Authentication authentication){
-        Long memberId = MemberUtil.getMemberId(authentication);
-        String content = request.content().split(",")[1];
-        byte[] decodedContent = Base64.getDecoder().decode(content);
-        resumeService.uploadResume(memberId, request, decodedContent);
-        return ResponseEntity.ok("파일 업로드 성공");
+    @GetMapping
+    public ResponseEntity<List<ResumeResponseDto>> getAllResumes () {
+        List<ResumeResponseDto> resumeResponseDtos = resumeService.getAllResumes();
+        return ResponseEntity.ok(resumeResponseDtos);
     }
 
     @GetMapping("/{resumeId}")
@@ -47,9 +42,10 @@ public class ResumeController {
         return ResponseEntity.ok(resumeResponseDto);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ResumeResponseDto>> getAllResumes () {
-        List<ResumeResponseDto> resumeResponseDtos = resumeService.getAllResumes();
+    @GetMapping("/my-resumes")
+    public ResponseEntity<List<ResumeResponseDto>> getMyResumes (Authentication authentication) {
+        Long memberId = MemberUtil.getMemberId(authentication);
+        List<ResumeResponseDto> resumeResponseDtos = resumeService.getMyResumes(memberId);
         return ResponseEntity.ok(resumeResponseDtos);
     }
 

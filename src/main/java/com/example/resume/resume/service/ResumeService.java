@@ -86,6 +86,12 @@ public class ResumeService {
         String fileUrl = resume.getFileUrl();
         return Paths.get(fileUrl);
     }
+
+    @Transactional(readOnly = true)
+    public List<ResumeResponseDto> getMyResumes(Long memberId) {
+        List<Resume> resumes = resumeRepository.findByMemberIdWithEvaluation(memberId);
+        return getResumeResponseDtos(resumes);
+    }
     private ResumeResponseDto getResumeResponseDto(List<Evaluation> evaluations, Resume resume) {
         List<EvaluationResponseDto> evaluationDtos = evaluations.stream()
                 .map(EvaluationResponseDto::fromEntity)
