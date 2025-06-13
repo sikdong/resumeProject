@@ -3,7 +3,7 @@ package com.example.resume.resume.dto;
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.user.dto.MemberDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,22 +14,29 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class ResumeResponseDto {
         private Long id;
         private String title;
         private String fileUrl;
+        private String keyword;
         private LocalDateTime createAt;
-        private Double averageScore;
+        private double averageScore;
         private int commentSize;
         @JsonInclude(NON_EMPTY)
         private List<EvaluationResponseDto> evaluations;
         @JsonInclude(NON_EMPTY)
         private MemberDto member;
 
-        public ResumeResponseDto(Long id, String title, String fileUrl, LocalDateTime createAt,
-                                 Double averageScore, int commentSize, List<EvaluationResponseDto> evaluations) {
-                this(id, title, fileUrl, createAt, averageScore, commentSize, evaluations, null);
+        @Builder
+        public ResumeResponseDto(Long id, String title, String fileUrl, String keyword, LocalDateTime createAt, Double averageScore, int commentSize, List<EvaluationResponseDto> evaluations, MemberDto member) {
+                this.id = id;
+                this.title = title;
+                this.fileUrl = fileUrl;
+                this.keyword = keyword;
+                this.createAt = createAt;
+                this.averageScore = averageScore;
+                this.commentSize = commentSize;
+                this.evaluations = evaluations;
+                this.member = member;
         }
-
 }

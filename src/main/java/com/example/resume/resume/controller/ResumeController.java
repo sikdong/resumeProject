@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.Base64;
@@ -68,5 +69,15 @@ public class ResumeController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadResume (
+            @RequestBody ResumeUploadRequestDto request,
+            Authentication authentication) throws IOException {
+        Long memberId = MemberUtil.getMemberId(authentication);
+        String content = request.content().split(",")[1];
+        resumeService.uploadResume(memberId, request, content);
+        return ResponseEntity.ok("파일 업로드 성공");
     }
 }

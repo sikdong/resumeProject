@@ -12,13 +12,10 @@ import java.util.List;
 public class Resume {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
-
     private String fileUrl;
-
+    private String keyword;
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
