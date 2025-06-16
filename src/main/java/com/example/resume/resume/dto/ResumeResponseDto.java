@@ -2,6 +2,7 @@ package com.example.resume.resume.dto;
 
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.user.dto.MemberDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class ResumeResponseDto {
         private String title;
         private String fileUrl;
         private String keyword;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime createAt;
         private double averageScore;
         private int commentSize;

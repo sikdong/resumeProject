@@ -12,6 +12,7 @@ import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +76,9 @@ public class ResumeService {
         return getResumeResponseDto(evaluations, resume);
     }
 
+    @Cacheable(value = "resumeList")
     public List<ResumeResponseDto> getAllResumes() {
+        log.info("Redis start");
         List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
         return getResumeResponseDtos(resumesWithEvaluation);
     }

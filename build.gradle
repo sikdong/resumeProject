@@ -38,6 +38,9 @@ dependencies {
 	implementation 'com.auth0:java-jwt:4.0.0'
 	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 tasks.named('test') {
