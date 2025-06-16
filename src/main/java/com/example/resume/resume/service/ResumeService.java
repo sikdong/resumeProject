@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
+import static com.example.resume.config.RedisConfig.RESUME_VIEW_COUNT_PREFIX;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -36,6 +39,7 @@ public class ResumeService {
     private final MemberRepository memberRepository;
     private final ResumeRepository resumeRepository;
     private final OpenAIService openAIService;
+    private final RedisTemplate<String, Long> redisTemplate;
 
     private static final String UPLOAD_DIR = "/uploads/";
 
@@ -71,10 +75,13 @@ public class ResumeService {
     }
     @Transactional(readOnly = true)
     public ResumeResponseDto getResumeById(Long resumeId) {
+        addViewCount(resumeId);
         Resume resume = resumeRepository.findByIdWithEvaluation(resumeId)
                 .orElseThrow(() -> new IllegalArgumentException("no resume"));
 
         List<Evaluation> evaluations = resume.getEvaluations();
+
+
         return getResumeResponseDto(evaluations, resume);
     }
 
@@ -116,6 +123,12 @@ public class ResumeService {
                 evaluationDtos,
                 MemberDto.fromEntity(resume.getMember())
         );
+    }
+
+    private void addViewCount(Long feedId) {
+        String redisKey = RESUME_VIEW_COUNT_PREFIX + feedId;
+        redisTemplate.opsForValue()
+                .increment(redisKey, 1L);
     }
 
     private List<ResumeResponseDto> getResumeResponseDtos(List<Resume> resumes) {
