@@ -12,6 +12,7 @@ import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class ResumeService {
 
     private static final String UPLOAD_DIR = "/uploads/";
 
+    @CacheEvict(value = "resumeList", allEntries = true)
     public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
