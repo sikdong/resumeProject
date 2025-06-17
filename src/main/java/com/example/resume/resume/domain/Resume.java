@@ -15,6 +15,7 @@ public class Resume {
     private String title;
     private String fileUrl;
     private String keyword;
+    private Long viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

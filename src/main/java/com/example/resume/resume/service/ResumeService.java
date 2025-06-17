@@ -75,13 +75,10 @@ public class ResumeService {
     }
     @Transactional(readOnly = true)
     public ResumeResponseDto getResumeById(Long resumeId) {
-        addViewCount(resumeId);
         Resume resume = resumeRepository.findByIdWithEvaluation(resumeId)
                 .orElseThrow(() -> new IllegalArgumentException("no resume"));
-
+        addViewCount(resumeId);
         List<Evaluation> evaluations = resume.getEvaluations();
-
-
         return getResumeResponseDto(evaluations, resume);
     }
 
@@ -121,7 +118,8 @@ public class ResumeService {
                 averageScore,
                 commentSize,
                 evaluationDtos,
-                MemberDto.fromEntity(resume.getMember())
+                MemberDto.fromEntity(resume.getMember()),
+                resume.getViewCount()
         );
     }
 

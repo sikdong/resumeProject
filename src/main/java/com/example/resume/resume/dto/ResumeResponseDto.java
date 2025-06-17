@@ -28,9 +28,20 @@ public class ResumeResponseDto {
         private List<EvaluationResponseDto> evaluations;
         @JsonInclude(NON_EMPTY)
         private MemberDto member;
+        private Long viewCount;
 
         @Builder
-        public ResumeResponseDto(Long id, String title, String fileUrl, String keyword, LocalDateTime createAt, Double averageScore, int commentSize, List<EvaluationResponseDto> evaluations, MemberDto member) {
+        public ResumeResponseDto(
+                Long id,
+                String title,
+                String fileUrl,
+                String keyword,
+                LocalDateTime createAt,
+                Double averageScore,
+                int commentSize,
+                List<EvaluationResponseDto> evaluations,
+                MemberDto member,
+                Long viewCount) {
                 this.id = id;
                 this.title = title;
                 this.fileUrl = fileUrl;
@@ -40,5 +51,6 @@ public class ResumeResponseDto {
                 this.commentSize = commentSize;
                 this.evaluations = evaluations;
                 this.member = member;
+                this.viewCount = viewCount;
         }
 }
