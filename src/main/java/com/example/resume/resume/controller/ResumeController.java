@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
@@ -53,10 +55,12 @@ public class ResumeController {
     public ResponseEntity<Resource> getFile(@PathVariable Long resumeId) throws MalformedURLException {
         Path filePath = resumeService.getFilePath(resumeId);
         String fileName = filePath.getFileName().toString();
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         Resource resource = new UrlResource(filePath.toUri());
         if (resource.exists()) {
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                    "inline; filename=\"" + fileName + "\"; filename*=UTF-8''" + encodedFileName);
             headers.add("X-Frame-Options", "ALLOWALL");
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_PDF)
