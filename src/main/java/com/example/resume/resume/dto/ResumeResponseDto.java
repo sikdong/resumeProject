@@ -51,6 +51,6 @@ public class ResumeResponseDto {
                 this.commentSize = commentSize;
                 this.evaluations = evaluations;
                 this.member = member;
-                this.viewCount = viewCount;
+                this.viewCount = viewCount == null ? 0L : viewCount;
         }
 }
