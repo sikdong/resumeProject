@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Getter
 @Setter
@@ -19,6 +20,7 @@ public class ResumeResponseDto {
         private Long id;
         private String title;
         private String fileUrl;
+        @JsonInclude(NON_NULL)
         private String keyword;
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime createAt;

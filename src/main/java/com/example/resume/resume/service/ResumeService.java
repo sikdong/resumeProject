@@ -39,7 +39,7 @@ public class ResumeService {
     private final OpenAIService openAIService;
     private final RedisTemplate<String, Long> redisTemplate;
 
-    private static final String UPLOAD_DIR = "/uploads/";
+    private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     @CacheEvict(value = "resumeList", allEntries = true)
@@ -102,6 +102,7 @@ public class ResumeService {
     }
 
     @Transactional(readOnly = true)
+    @CacheEvict(value = "resumeList", allEntries = true)
     public ResumeResponseDto getResumeById(Long resumeId) {
         incrementViewCount(resumeId);
         Resume resume = findResumeByIdWithEvaluation(resumeId);

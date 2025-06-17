@@ -25,7 +25,6 @@ public class ResumeSyncService {
     @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void syncFeedViewsToDb() {
-        log.info("Starting syncFeedViewsToDb");
         Set<String> keys = redisTemplate.keys(RESUME_VIEW_COUNT_PREFIX + "*");
         if (keys.isEmpty()) {
             return;
