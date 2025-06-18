@@ -60,7 +60,7 @@ public class ResumeController {
         if (resource.exists()) {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION,
-                    "inline; filename=\"" + fileName + "\"; filename*=UTF-8''" + encodedFileName);
+                    "inline; filename*=UTF-8''" + encodedFileName);
             headers.add("X-Frame-Options", "ALLOWALL");
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_PDF)
