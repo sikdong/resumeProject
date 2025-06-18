@@ -41,22 +41,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /*@Bean
-    @Order(1)
-    public SecurityFilterChain apiFilterChain(HttpSecurity http,
-                                              JwtAuthenticationFilter jwtFilter) throws Exception {
-        http
-                .securityMatcher("/api/**")
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
-                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    res.getWriter().write("Unauthorized");
-                }));
-
-        return http.build();
-    }*/
-
 
     @Bean
     public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
