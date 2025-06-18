@@ -13,7 +13,9 @@ public class CorsGlobalConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://app.appsmith.com")
+                        .allowedOrigins(
+                                "https://app.appsmith.com",
+                                "http://56.155.81.137")
                         .allowedMethods("*")
                         .allowCredentials(true);
             }
