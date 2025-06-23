@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
+import static com.example.resume.config.RedisConfig.RESUME_VIEWED_MEMBER_DAY;
 import static com.example.resume.config.RedisConfig.RESUME_VIEW_COUNT_PREFIX;
 
 @RequiredArgsConstructor
@@ -164,9 +165,12 @@ public class ResumeService {
 
     private void incrementViewCount(Long resumeId, Long memberId) {
         String redisKey = RESUME_VIEW_COUNT_PREFIX + resumeId;
-        String memberKey = "viewedMember";
-        redisTemplate.opsForHash().put(memberKey, "member"+memberId, memberId.toString());
-        redisTemplate.opsForValue().increment(redisKey, 1L);
+        String memberKey = RESUME_VIEWED_MEMBER_DAY;
+        if (!redisTemplate.opsForHash().hasKey(memberKey, "member"+memberId)) {
+            log.info("first member {} viewed", memberId);
+            redisTemplate.opsForHash().put(memberKey, "member"+memberId, System.currentTimeMillis());
+            redisTemplate.opsForValue().increment(redisKey, 1L);
+        }
     }
 
     private int countComments(List<Evaluation> evaluations) {

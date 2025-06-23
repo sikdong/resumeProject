@@ -1,5 +1,6 @@
 package com.example.resume.resume.service;
 
+import static com.example.resume.config.RedisConfig.RESUME_VIEWED_MEMBER_DAY;
 import static com.example.resume.config.RedisConfig.RESUME_VIEW_COUNT_PREFIX;
 
 import java.util.Optional;
@@ -45,5 +46,10 @@ public class ResumeSyncService {
         log.info("starting Update");
         resumeRepository.incrementViewCount(resumeId, redisViewCount); // DB에 조회수 증가
         redisTemplate.delete(redisKey); // Redis에서 해당 키 삭제
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void clearViewedMember(){
+        redisTemplate.delete(RESUME_VIEWED_MEMBER_DAY);
     }
 }

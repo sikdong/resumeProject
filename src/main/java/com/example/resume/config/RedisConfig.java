@@ -10,6 +10,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
     public static final String RESUME_VIEW_COUNT_PREFIX = "resumeViewCount:";
+    public static final String RESUME_VIEWED_MEMBER_DAY = "viewedMemberDay:";
 
     @Bean
     LettuceConnectionFactory connectionFactory() {
