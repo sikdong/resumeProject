@@ -103,8 +103,8 @@ public class ResumeService {
 
     @Transactional(readOnly = true)
     @CacheEvict(value = "resumeList", allEntries = true)
-    public ResumeResponseDto getResumeById(Long resumeId) {
-        incrementViewCount(resumeId);
+    public ResumeResponseDto getResumeById(Long resumeId, Long memberId) {
+        incrementViewCount(resumeId, memberId);
         Resume resume = findResumeByIdWithEvaluation(resumeId);
         return buildResumeResponseDto(resume);
     }
@@ -162,8 +162,10 @@ public class ResumeService {
         );
     }
 
-    private void incrementViewCount(Long resumeId) {
+    private void incrementViewCount(Long resumeId, Long memberId) {
         String redisKey = RESUME_VIEW_COUNT_PREFIX + resumeId;
+        String memberKey = "viewedMember";
+        redisTemplate.opsForHash().put(memberKey, "member"+memberId, memberId.toString());
         redisTemplate.opsForValue().increment(redisKey, 1L);
     }
 

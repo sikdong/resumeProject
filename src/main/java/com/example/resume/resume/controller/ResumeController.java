@@ -39,8 +39,9 @@ public class ResumeController {
     }
 
     @GetMapping("/{resumeId}")
-    public ResponseEntity<ResumeResponseDto> getResume (@PathVariable Long resumeId) {
-        ResumeResponseDto resumeResponseDto = resumeService.getResumeById(resumeId);
+    public ResponseEntity<ResumeResponseDto> getResume (@PathVariable Long resumeId, Authentication authentication) {
+        Long memberId = MemberUtil.getMemberId(authentication);
+        ResumeResponseDto resumeResponseDto = resumeService.getResumeById(resumeId, memberId);
         return ResponseEntity.ok(resumeResponseDto);
     }
 
