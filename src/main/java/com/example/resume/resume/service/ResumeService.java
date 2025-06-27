@@ -166,9 +166,10 @@ public class ResumeService {
     private void incrementViewCount(Long resumeId, Long memberId) {
         String redisKey = RESUME_VIEW_COUNT_PREFIX + resumeId;
         String memberKey = RESUME_VIEWED_MEMBER_DAY;
-        if (!redisTemplate.opsForHash().hasKey(memberKey, "member"+memberId)) {
+        String memberHashKey = "member"+memberId+resumeId;
+        if (!redisTemplate.opsForHash().hasKey(memberKey, memberHashKey)) {
             log.info("first member {} viewed", memberId);
-            redisTemplate.opsForHash().put(memberKey, "member"+memberId, System.currentTimeMillis());
+            redisTemplate.opsForHash().put(memberKey, memberHashKey, System.currentTimeMillis());
             redisTemplate.opsForValue().increment(redisKey, 1L);
         }
     }
