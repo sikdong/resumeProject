@@ -24,7 +24,7 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     List<Resume> findByMemberIdWithEvaluation(@Param("memberId") Long memberId);
 
     @Modifying
-    @Query("UPDATE Resume r SET r.viewCount = :viewCount where r.id = :resumeId")
+    @Query("UPDATE Resume r SET r.viewCount = r.viewCount+:viewCount where r.id = :resumeId")
     void incrementViewCount(@Param("resumeId") Long resumeId, @Param("viewCount") long viewCount);
 
 }
