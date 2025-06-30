@@ -4,6 +4,7 @@ import com.example.resume.common.MemberUtil;
 import com.example.resume.resume.dto.ResumeResponseDto;
 import com.example.resume.resume.dto.ResumeUploadRequestDto;
 import com.example.resume.resume.service.ResumeService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -39,9 +40,12 @@ public class ResumeController {
     }
 
     @GetMapping("/{resumeId}")
-    public ResponseEntity<ResumeResponseDto> getResume (@PathVariable Long resumeId, Authentication authentication) {
+    public ResponseEntity<ResumeResponseDto> getResume (@PathVariable Long resumeId,
+                                                        Authentication authentication,
+                                                        HttpServletRequest request) {
         Long memberId = MemberUtil.getMemberId(authentication);
-        ResumeResponseDto resumeResponseDto = resumeService.getResumeById(resumeId, memberId);
+        String clientIp = MemberUtil.getClientIp(request);
+        ResumeResponseDto resumeResponseDto = resumeService.getResumeById(resumeId, memberId, clientIp);
         return ResponseEntity.ok(resumeResponseDto);
     }
 

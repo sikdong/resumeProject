@@ -25,6 +25,6 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
     @Modifying
     @Query("UPDATE Resume r SET r.viewCount = r.viewCount+:viewCount where r.id = :resumeId")
-    void incrementViewCount(@Param("resumeId") Long resumeId, @Param("viewCount") long viewCount);
+    void incrementViewCount(@Param("resumeId") Long resumeId, @Param("viewCount") Object viewCount);
 
 }

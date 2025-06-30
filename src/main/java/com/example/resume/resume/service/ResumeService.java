@@ -7,6 +7,7 @@ import com.example.resume.resume.domain.Resume;
 import com.example.resume.resume.dto.ResumeResponseDto;
 import com.example.resume.resume.dto.ResumeUploadRequestDto;
 import com.example.resume.resume.repository.ResumeRepository;
+import com.example.resume.resume.service.support.ResumeViewManager;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.example.resume.config.RedisConfig.RESUME_VIEWED_MEMBER_DAY;
+import static com.example.resume.config.RedisConfig.RESUME_VIEWED_NOT_MEMBER;
 import static com.example.resume.config.RedisConfig.RESUME_VIEW_COUNT_PREFIX;
 
 @RequiredArgsConstructor
@@ -38,7 +40,8 @@ public class ResumeService {
     private final MemberRepository memberRepository;
     private final ResumeRepository resumeRepository;
     private final OpenAIService openAIService;
-    private final RedisTemplate<String, Long> redisTemplate;
+    private final RedisTemplate<String, Object> objectRedisTemplate;
+    private final ResumeViewManager resumeViewManager;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
@@ -104,10 +107,30 @@ public class ResumeService {
 
     @Transactional(readOnly = true)
     @CacheEvict(value = "resumeList", allEntries = true)
-    public ResumeResponseDto getResumeById(Long resumeId, Long memberId) {
-        incrementViewCount(resumeId, memberId);
+    public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
         Resume resume = findResumeByIdWithEvaluation(resumeId);
+        resumeViewManager.processViewCount(resumeId, memberId, clientIp);
         return buildResumeResponseDto(resume);
+    }
+
+    private void increaseViewCount(Long resumeId, Long memberId, String clientIp) {
+        String redisKey = RESUME_VIEW_COUNT_PREFIX + resumeId;
+        String memberHashKey = "member"+memberId+resumeId;
+        if (isIncreasedValue(objectRedisTemplate, memberId, clientIp, memberHashKey)) {
+            log.info("first member {} viewed", memberId);
+            objectRedisTemplate.opsForHash().put(RESUME_VIEWED_MEMBER_DAY, memberHashKey, System.currentTimeMillis());
+            objectRedisTemplate.opsForValue().increment(redisKey, 1L);
+        }
+    }
+
+    private boolean isIncreasedValue(RedisTemplate<String, Object> objectRedisTemplate,
+                                     Long memberId,
+                                     String clientIp,
+                                     String memberHashKey) {
+        if (memberId == 0L){
+            return Boolean.FALSE.equals(objectRedisTemplate.opsForSet().isMember(RESUME_VIEWED_NOT_MEMBER, clientIp));
+        }
+        return !objectRedisTemplate.opsForHash().hasKey(RESUME_VIEWED_MEMBER_DAY, memberHashKey);
     }
 
     private Resume findResumeByIdWithEvaluation(Long resumeId) {
@@ -118,7 +141,6 @@ public class ResumeService {
     @Cacheable(value = "resumeList")
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getAllResumes() {
-        log.info("Redis 캐시에서 이력서 목록을 조회합니다.");
         List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
         return resumesWithEvaluation.stream()
                 .map(this::buildResumeResponseDto)
@@ -161,17 +183,6 @@ public class ResumeService {
                 MemberDto.fromEntity(resume.getMember()),
                 resume.getViewCount()
         );
-    }
-
-    private void incrementViewCount(Long resumeId, Long memberId) {
-        String redisKey = RESUME_VIEW_COUNT_PREFIX + resumeId;
-        String memberKey = RESUME_VIEWED_MEMBER_DAY;
-        String memberHashKey = "member"+memberId+resumeId;
-        if (!redisTemplate.opsForHash().hasKey(memberKey, memberHashKey)) {
-            log.info("first member {} viewed", memberId);
-            redisTemplate.opsForHash().put(memberKey, memberHashKey, System.currentTimeMillis());
-            redisTemplate.opsForValue().increment(redisKey, 1L);
-        }
     }
 
     private int countComments(List<Evaluation> evaluations) {

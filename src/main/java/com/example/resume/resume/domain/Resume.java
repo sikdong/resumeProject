@@ -15,6 +15,7 @@ public class Resume {
     private String title;
     private String fileUrl;
     private String keyword;
+    @Column(name = "view_count", nullable = false, columnDefinition = "bigint default 0")
     private Long viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

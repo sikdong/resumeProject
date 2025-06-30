@@ -58,6 +58,8 @@ class ResumeServiceTest {
     private Resume testResume;
     private List<Evaluation> evaluations;
 
+    private final String local = "127.0.0.1";
+
     @BeforeEach
     void setUp() {
         testMember = Member.builder()
@@ -121,7 +123,7 @@ class ResumeServiceTest {
         given(hashOperations.hasKey(any(), any())).willReturn(false);
 
         // when
-        ResumeResponseDto result = resumeService.getResumeById(1L, 1L);
+        ResumeResponseDto result = resumeService.getResumeById(1L, 1L, local);
 
         // then
         assertThat(result).isNotNull();
