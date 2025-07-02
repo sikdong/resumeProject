@@ -9,7 +9,6 @@ import static com.example.resume.config.RedisConfig.RESUME_VIEWED_MEMBER_DAY;
 import static com.example.resume.config.RedisConfig.RESUME_VIEWED_NOT_MEMBER;
 import static com.example.resume.config.RedisConfig.RESUME_VIEW_COUNT_PREFIX;
 
-// 새로운 클래스 생성
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -40,7 +40,6 @@ public class ResumeService {
     private final MemberRepository memberRepository;
     private final ResumeRepository resumeRepository;
     private final OpenAIService openAIService;
-    private final RedisTemplate<String, Object> objectRedisTemplate;
     private final ResumeViewManager resumeViewManager;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
@@ -111,26 +110,6 @@ public class ResumeService {
         Resume resume = findResumeByIdWithEvaluation(resumeId);
         resumeViewManager.processViewCount(resumeId, memberId, clientIp);
         return buildResumeResponseDto(resume);
-    }
-
-    private void increaseViewCount(Long resumeId, Long memberId, String clientIp) {
-        String redisKey = RESUME_VIEW_COUNT_PREFIX + resumeId;
-        String memberHashKey = "member"+memberId+resumeId;
-        if (isIncreasedValue(objectRedisTemplate, memberId, clientIp, memberHashKey)) {
-            log.info("first member {} viewed", memberId);
-            objectRedisTemplate.opsForHash().put(RESUME_VIEWED_MEMBER_DAY, memberHashKey, System.currentTimeMillis());
-            objectRedisTemplate.opsForValue().increment(redisKey, 1L);
-        }
-    }
-
-    private boolean isIncreasedValue(RedisTemplate<String, Object> objectRedisTemplate,
-                                     Long memberId,
-                                     String clientIp,
-                                     String memberHashKey) {
-        if (memberId == 0L){
-            return Boolean.FALSE.equals(objectRedisTemplate.opsForSet().isMember(RESUME_VIEWED_NOT_MEMBER, clientIp));
-        }
-        return !objectRedisTemplate.opsForHash().hasKey(RESUME_VIEWED_MEMBER_DAY, memberHashKey);
     }
 
     private Resume findResumeByIdWithEvaluation(Long resumeId) {
