@@ -81,8 +81,8 @@ class ResumeServiceTest {
                 .build();
         testResume.setEvaluations(evaluations);
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(redisTemplate.opsForHash()).thenReturn(hashOperations);
     }
 
     @Test
