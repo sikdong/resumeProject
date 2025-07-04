@@ -1,7 +1,7 @@
 package com.example.resume.evaluation.domain;
 
 import com.example.resume.user.domain.Member;
-import com.example.resume.resume.domain.Resume;
+import com.example.resume.cv.domain.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

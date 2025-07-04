@@ -1,6 +1,6 @@
-package com.example.resume.resume.service;
+package com.example.resume.cv.service;
 
-import com.example.resume.resume.repository.ResumeRepository;
+import com.example.resume.cv.repository.jpa.ResumeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

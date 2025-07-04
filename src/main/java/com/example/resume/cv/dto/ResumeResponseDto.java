@@ -1,4 +1,4 @@
-package com.example.resume.resume.dto;
+package com.example.resume.cv.dto;
 
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.user.dto.MemberDto;

@@ -1,6 +1,6 @@
-package com.example.resume.resume.repository;
+package com.example.resume.cv.repository.jpa;
 
-import com.example.resume.resume.domain.Resume;
+import com.example.resume.cv.domain.Resume;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

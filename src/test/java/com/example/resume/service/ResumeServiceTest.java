@@ -1,11 +1,11 @@
-package com.example.resume.resume.service;
+package com.example.resume.cv.service;
 
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.openAI.service.OpenAIService;
-import com.example.resume.resume.domain.Resume;
-import com.example.resume.resume.dto.ResumeResponseDto;
-import com.example.resume.resume.dto.ResumeUploadRequestDto;
-import com.example.resume.resume.repository.ResumeRepository;
+import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.dto.ResumeResponseDto;
+import com.example.resume.cv.dto.ResumeUploadRequestDto;
+import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;

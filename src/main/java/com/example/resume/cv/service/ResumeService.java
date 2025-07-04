@@ -1,13 +1,13 @@
-package com.example.resume.resume.service;
+package com.example.resume.cv.service;
 
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.openAI.service.OpenAIService;
-import com.example.resume.resume.domain.Resume;
-import com.example.resume.resume.dto.ResumeResponseDto;
-import com.example.resume.resume.dto.ResumeUploadRequestDto;
-import com.example.resume.resume.repository.ResumeRepository;
-import com.example.resume.resume.service.support.ResumeViewManager;
+import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.dto.ResumeResponseDto;
+import com.example.resume.cv.dto.ResumeUploadRequestDto;
+import com.example.resume.cv.repository.jpa.ResumeRepository;
+import com.example.resume.cv.service.support.ResumeViewManager;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +26,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-
-import static com.example.resume.config.RedisConfig.RESUME_VIEWED_MEMBER_DAY;
-import static com.example.resume.config.RedisConfig.RESUME_VIEWED_NOT_MEMBER;
-import static com.example.resume.config.RedisConfig.RESUME_VIEW_COUNT_PREFIX;
 
 @RequiredArgsConstructor
 @Service

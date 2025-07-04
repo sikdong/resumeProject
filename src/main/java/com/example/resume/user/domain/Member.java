@@ -2,7 +2,7 @@ package com.example.resume.user.domain;
 
 import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
-import com.example.resume.resume.domain.Resume;
+import com.example.resume.cv.domain.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

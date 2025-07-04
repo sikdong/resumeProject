@@ -1,9 +1,9 @@
-package com.example.resume.resume.controller;
+package com.example.resume.cv.controller;
 
 import com.example.resume.common.MemberUtil;
-import com.example.resume.resume.dto.ResumeResponseDto;
-import com.example.resume.resume.dto.ResumeUploadRequestDto;
-import com.example.resume.resume.service.ResumeService;
+import com.example.resume.cv.dto.ResumeResponseDto;
+import com.example.resume.cv.dto.ResumeUploadRequestDto;
+import com.example.resume.cv.service.ResumeService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Base64;
 import java.util.List;
 
 @RestController

@@ -1,4 +1,4 @@
-package com.example.resume.resume.domain;
+package com.example.resume.cv.domain;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.user.domain.Member;
 import jakarta.persistence.*;
