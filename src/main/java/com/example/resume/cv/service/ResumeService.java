@@ -1,5 +1,8 @@
 package com.example.resume.cv.service;
 
+import com.example.resume.cv.domain.ResumeDocument;
+import com.example.resume.cv.dto.ResumeMapper;
+import com.example.resume.cv.search.ResumeSearchRepository;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
 import com.example.resume.openAI.service.OpenAIService;
@@ -36,9 +39,11 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final OpenAIService openAIService;
     private final ResumeViewManager resumeViewManager;
+    private final ResumeMapper resumeMapper;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    private final ResumeSearchRepository resumeSearchRepository;
 
     @CacheEvict(value = "resumeList", allEntries = true)
     @Transactional
@@ -49,13 +54,27 @@ public class ResumeService {
         log.info("파일이 성공적으로 저장되었습니다. fileUrl: {}", fileUrl);
         
         String keyword = openAIService.getResumeKeyword(content);
-        Resume resume = Resume.builder()
+        /*Resume resume = Resume.builder()
                 .member(member)
                 .title(request.title())
                 .fileUrl(fileUrl)
                 .keyword(keyword)
+                .build();*/
+        //FIXME
+        Resume resume = Resume.builder()
+                .member(member)
+                .title(request.title())
+                .fileUrl(fileUrl)
+                .keyword("java")
                 .build();
-        resumeRepository.save(resume);
+        save(resume);
+    }
+
+    private Resume save(Resume resume){
+        Resume saved = resumeRepository.save(resume);
+        ResumeDocument document = resumeMapper.toDocument(saved);
+        resumeSearchRepository.save(document);
+        return saved;
     }
 
     private Member findMemberById(Long userId) {
@@ -65,10 +84,19 @@ public class ResumeService {
 
     private byte[] decodeBase64Content(String content) {
         try {
+            // Base64 메타 데이터 제거 (예: data:[MIME 타입];base64,)
+            if (content.contains(",")) {
+                content = content.split(",", 2)[1];
+            }
+
+            // Base64 입력 값 유효성 검증 (기본적으로 공백 제거)
+            content = content.trim();
+
+            // 디코딩 후 반환
             return java.util.Base64.getDecoder().decode(content);
         } catch (IllegalArgumentException e) {
-            log.error("Base64 디코딩에 실패했습니다.", e);
-            throw new IllegalArgumentException("잘못된 파일 형식입니다.", e);
+            log.error("Base64 디코딩에 실패했습니다. 입력 데이터가 잘못되었습니다.", e);
+            throw new IllegalArgumentException("잘못된 파일 형식입니다.(Base64 데이터가 유효하지 않음)", e);
         }
     }
 
@@ -180,5 +208,12 @@ public class ResumeService {
                 .orElse(0.0);
         
         return Math.round(average * 10) / 10.0;
+    }
+
+    public List<ResumeResponseDto> getResumesByIds(List<Long> ids) {
+        List<Resume> resumes = resumeRepository.findAllWithEvaluationByIdIn(ids);
+        return resumes.stream()
+                .map(this::buildResumeResponseDto)
+                .toList();
     }
 }

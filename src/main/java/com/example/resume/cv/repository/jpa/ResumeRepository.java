@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,4 +28,10 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     @Query("UPDATE Resume r SET r.viewCount = r.viewCount+:viewCount where r.id = :resumeId")
     void incrementViewCount(@Param("resumeId") Long resumeId, @Param("viewCount") Object viewCount);
 
+    @Query("SELECT r FROM Resume r " +
+            "LEFT JOIN FETCH r.evaluations " +
+            "LEFT JOIN FETCH r.member " +
+            "WHERE r.id in :ids " +
+            "ORDER BY r.createdAt desc")
+    List<Resume> findAllWithEvaluationByIdIn(@Param("ids") List<Long> ids);
 }
