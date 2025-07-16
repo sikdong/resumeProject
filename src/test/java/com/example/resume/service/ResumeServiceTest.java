@@ -1,6 +1,9 @@
-package com.example.resume.cv.service;
+package com.example.resume.service;
 
+import com.example.resume.cv.service.ResumeService;
+import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.openAI.service.OpenAIService;
 import com.example.resume.cv.domain.Resume;
 import com.example.resume.cv.dto.ResumeResponseDto;
@@ -43,6 +46,9 @@ class ResumeServiceTest {
     private ResumeRepository resumeRepository;
 
     @Mock
+    private EvaluationRepository evaluationRepository;
+
+    @Mock
     private OpenAIService openAIService;
 
     @Mock
@@ -66,11 +72,23 @@ class ResumeServiceTest {
                 .id(1L)
                 .email("test@test.com")
                 .name("테스트")
+                .careerLevel(CareerLevel.JUNIOR)
+                .role(Member.Role.USER)
                 .build();
 
         evaluations = new ArrayList<>();
-        evaluations.add(Evaluation.builder().score(4.5).comment("좋은 이력서입니다.").build());
-        evaluations.add(Evaluation.builder().score(4.0).comment("인상적입니다.").build());
+        evaluations.add(Evaluation.builder()
+                        .id(1L)
+                        .score(4.5)
+                        .comment("좋은 이력서입니다.")
+                        .evaluator(testMember)
+                        .build());
+
+        evaluations.add(Evaluation.builder()
+                        .id(2L)
+                        .score(4.0)
+                        .evaluator(testMember)
+                        .comment("인상적입니다.").build());
 
         testResume = Resume.builder()
                 .id(1L)
@@ -160,5 +178,19 @@ class ResumeServiceTest {
         // then
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getTitle()).isEqualTo("테스트 이력서");
+    }
+
+    @Test
+    @DisplayName("이력서 삭제 - 성공")
+    void deleteResume_Success() {
+        given(resumeRepository.findByIdWithEvaluation(1L)).willReturn(Optional.of(testResume));
+
+        resumeService.deleteResume(1L);
+
+        // then
+        verify(evaluationRepository).deleteById(1L);
+        verify(evaluationRepository).deleteById(2L);
+        verify(resumeRepository).delete(testResume);
+
     }
 }

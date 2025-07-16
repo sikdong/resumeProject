@@ -5,6 +5,7 @@ import com.example.resume.cv.dto.ResumeMapper;
 import com.example.resume.cv.search.ResumeSearchRepository;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.dto.EvaluationResponseDto;
+import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.openAI.service.OpenAIService;
 import com.example.resume.cv.domain.Resume;
 import com.example.resume.cv.dto.ResumeResponseDto;
@@ -40,6 +41,7 @@ public class ResumeService {
     private final OpenAIService openAIService;
     private final ResumeViewManager resumeViewManager;
     private final ResumeMapper resumeMapper;
+    private final EvaluationRepository evaluationRepository;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
@@ -70,11 +72,10 @@ public class ResumeService {
         save(resume);
     }
 
-    private Resume save(Resume resume){
+    private void save(Resume resume){
         Resume saved = resumeRepository.save(resume);
         ResumeDocument document = resumeMapper.toDocument(saved);
         resumeSearchRepository.save(document);
-        return saved;
     }
 
     private Member findMemberById(Long userId) {
@@ -215,5 +216,18 @@ public class ResumeService {
         return resumes.stream()
                 .map(this::buildResumeResponseDto)
                 .toList();
+    }
+
+    public void deleteResume(Long resumeId) {
+        Resume resume = resumeRepository.findByIdWithEvaluation(resumeId)
+                .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다 === " + resumeId));
+        List<Long> evaluationIds = resume.getEvaluations()
+                .stream()
+                .map(Evaluation::getId)
+                .toList();
+        for (Long evaluationId : evaluationIds) {
+            evaluationRepository.deleteById(evaluationId);
+        }
+        resumeRepository.delete(resume);
     }
 }

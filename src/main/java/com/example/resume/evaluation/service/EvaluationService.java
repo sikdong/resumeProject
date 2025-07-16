@@ -30,4 +30,8 @@ public class EvaluationService {
                 .build();
         evaluationRepository.save(evaluation);
     }
+
+    public void deleteEvaluation(Long evaluationId) {
+        evaluationRepository.deleteById(evaluationId);
+    }
 }
