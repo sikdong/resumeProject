@@ -19,7 +19,7 @@ public class Resume {
     private String title;
     private String fileUrl;
 
-    @ColumnDefault("")
+    @Column(columnDefinition = "varchar(255) default ''")
     private String keyword;
 
     @Column(name = "view_count", columnDefinition = "bigint default 0")
