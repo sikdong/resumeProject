@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -165,6 +166,23 @@ public class ResumeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ResumeResponseDto> getResumesByIds(List<Long> ids) {
+        List<Resume> resumes = resumeRepository.findAllWithEvaluationByIdIn(ids);
+        return resumes.stream()
+                .map(this::buildResumeResponseDto)
+                .toList();
+    }
+
+    @Transactional
+    @CacheEvict(value = "resumeList", allEntries = true)
+    public void deleteResume(Long resumeId) {
+        evaluationRepository.deleteAllByResumeId(resumeId);;
+        resumeSearchRepository.deleteById(String.valueOf(resumeId));
+        resumeRepository.deleteById(resumeId);
+    }
+
+    /*******private method*******/
     private ResumeResponseDto buildResumeResponseDto(Resume resume) {
         List<Evaluation> evaluations = resume.getEvaluations();
         List<EvaluationResponseDto> evaluationDtos = evaluations.stream()
@@ -209,18 +227,5 @@ public class ResumeService {
                 .orElse(0.0);
         
         return Math.round(average * 10) / 10.0;
-    }
-
-    public List<ResumeResponseDto> getResumesByIds(List<Long> ids) {
-        List<Resume> resumes = resumeRepository.findAllWithEvaluationByIdIn(ids);
-        return resumes.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
-    }
-
-    @Transactional
-    public void deleteResume(Long resumeId) {
-        evaluationRepository.deleteAllByResumeId(resumeId);
-        resumeRepository.deleteById(resumeId);
     }
 }
