@@ -218,16 +218,9 @@ public class ResumeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteResume(Long resumeId) {
-        Resume resume = resumeRepository.findByIdWithEvaluation(resumeId)
-                .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다 === " + resumeId));
-        List<Long> evaluationIds = resume.getEvaluations()
-                .stream()
-                .map(Evaluation::getId)
-                .toList();
-        for (Long evaluationId : evaluationIds) {
-            evaluationRepository.deleteById(evaluationId);
-        }
-        resumeRepository.delete(resume);
+        evaluationRepository.deleteAllByResumeId(resumeId);
+        resumeRepository.deleteById(resumeId);
     }
 }

@@ -183,14 +183,11 @@ class ResumeServiceTest {
     @Test
     @DisplayName("이력서 삭제 - 성공")
     void deleteResume_Success() {
-        given(resumeRepository.findByIdWithEvaluation(1L)).willReturn(Optional.of(testResume));
-
+        //then
         resumeService.deleteResume(1L);
 
         // then
-        verify(evaluationRepository).deleteById(1L);
-        verify(evaluationRepository).deleteById(2L);
-        verify(resumeRepository).delete(testResume);
-
+        verify(evaluationRepository).deleteAllByResumeId(1L);
+        verify(resumeRepository).deleteById(1L);
     }
 }

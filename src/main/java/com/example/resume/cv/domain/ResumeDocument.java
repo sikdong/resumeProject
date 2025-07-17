@@ -15,6 +15,6 @@ public class ResumeDocument {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text, analyzer = "korean")
+    @Field(type = FieldType.Text)
     private String keyword;
 }
