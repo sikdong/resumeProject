@@ -30,4 +30,14 @@ public class EvaluationController {
         evaluationService.deleteEvaluation(evaluationId);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{evaluationId}")
+    public ResponseEntity<Void> updateEvaluation(
+            @PathVariable Long evaluationId,
+            @RequestBody EvaluationRequestDto evaluationRequestDto,
+            Authentication authentication){
+        Long memberId = MemberUtil.getMemberId(authentication);
+        evaluationService.update(evaluationId, evaluationRequestDto, memberId);
+        return ResponseEntity.ok().build();
+    }
 }
