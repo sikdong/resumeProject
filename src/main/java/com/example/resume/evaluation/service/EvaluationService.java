@@ -21,7 +21,7 @@ public class EvaluationService {
     @Transactional
     public void evaluate(Long resumeId, EvaluationRequestDto evaluationRequestDto, Long memberId) {
         Resume resume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
+        Member member = validateMember(memberId);
         Evaluation evaluation = Evaluation.builder()
                 .resume(resume)
                 .score(evaluationRequestDto.getScore())
@@ -34,4 +34,19 @@ public class EvaluationService {
     public void deleteEvaluation(Long evaluationId) {
         evaluationRepository.deleteById(evaluationId);
     }
+
+    public void update(Long evaluationId, EvaluationRequestDto evaluationRequestDto, Long memberId) {
+        validateMember(memberId);
+        evaluationRepository.findById(evaluationId)
+                .ifPresent(evaluation -> {
+                    evaluation.setScore(evaluationRequestDto.getScore());
+                    evaluation.setComment(evaluationRequestDto.getComment());
+                });
+    }
+
+    /********private method*********/
+    private Member validateMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
+    }
+
 }
