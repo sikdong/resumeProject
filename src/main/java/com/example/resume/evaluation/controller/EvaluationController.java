@@ -42,4 +42,17 @@ public class EvaluationController {
         evaluationService.update(evaluationId, evaluationRequestDto, memberId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{evaluationId}")
+    public ResponseEntity<EvaluationDto> getEvaluation(@PathVariable Long evaluationId){
+        EvaluationDto evaluationDto = evaluationService.getEvaluation(evaluationId);
+        return ResponseEntity.ok(evaluationDto);
+    }
+
+    @GetMapping("/my-evaluation")
+    public ResponseEntity<List<EvaluationUpdateResponseDto>> getMyEvaluation(Authentication authentication){
+        Long memberId = MemberUtil.getMemberId(authentication);
+        List<EvaluationUpdateResponseDto> evaluationResponseDtos = evaluationService.getMyEvaluations(memberId);
+        return ResponseEntity.ok(evaluationResponseDtos);
+    }
 }

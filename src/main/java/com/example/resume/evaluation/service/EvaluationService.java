@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EvaluationService {
@@ -32,6 +34,7 @@ public class EvaluationService {
         evaluationRepository.save(evaluation);
     }
 
+    @Transactional
     public void deleteEvaluation(Long evaluationId) {
         evaluationRepository.deleteById(evaluationId);
     }
@@ -46,9 +49,21 @@ public class EvaluationService {
                 });
     }
 
+    public EvaluationDto getEvaluation(Long evaluationId) {
+        Evaluation evaluation = evaluationRepository.findById(evaluationId)
+                .orElseThrow(() -> new IllegalArgumentException("평가가 존재하지 않습니다 === " + evaluationId));
+        return EvaluationDto.fromEntity(evaluation);
+    }
+
+    public List<EvaluationUpdateResponseDto> getMyEvaluations(Long memberId) {
+        return evaluationRepository.findByMemberIdWithResume(memberId)
+                .stream()
+                .map(EvaluationUpdateResponseDto::fromEntity)
+                .toList();
+    }
+
     /********private method*********/
     private Member validateMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
     }
-
 }
