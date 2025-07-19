@@ -1,12 +1,14 @@
 package com.example.resume.evaluation.controller;
 
 import com.example.resume.common.MemberUtil;
-import com.example.resume.evaluation.dto.EvaluationRequestDto;
+import com.example.resume.evaluation.dto.EvaluationDto;
+import com.example.resume.evaluation.dto.EvaluationUpdateResponseDto;
 import com.example.resume.evaluation.service.EvaluationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/evaluation")
@@ -18,7 +20,7 @@ public class EvaluationController {
     @PostMapping("/{resumeId}")
     public ResponseEntity<Void> evaluate(
             @PathVariable Long resumeId,
-            @RequestBody EvaluationRequestDto evaluationRequestDto,
+            @RequestBody EvaluationDto evaluationRequestDto,
             Authentication authentication){
         Long memberId = MemberUtil.getMemberId(authentication);
         evaluationService.evaluate(resumeId, evaluationRequestDto, memberId);
@@ -34,7 +36,7 @@ public class EvaluationController {
     @PutMapping("/{evaluationId}")
     public ResponseEntity<Void> updateEvaluation(
             @PathVariable Long evaluationId,
-            @RequestBody EvaluationRequestDto evaluationRequestDto,
+            @RequestBody EvaluationDto evaluationRequestDto,
             Authentication authentication){
         Long memberId = MemberUtil.getMemberId(authentication);
         evaluationService.update(evaluationId, evaluationRequestDto, memberId);

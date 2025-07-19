@@ -1,6 +1,6 @@
 package com.example.resume.cv.dto;
 
-import com.example.resume.evaluation.dto.EvaluationResponseDto;
+import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
 import com.example.resume.user.dto.MemberDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,7 +27,7 @@ public class ResumeResponseDto {
         private double averageScore;
         private int commentSize;
         @JsonInclude(NON_EMPTY)
-        private List<EvaluationResponseDto> evaluations;
+        private List<EvaluationSummaryResponseDto> evaluations;
         @JsonInclude(NON_EMPTY)
         private MemberDto member;
         private Long viewCount;
@@ -41,7 +41,7 @@ public class ResumeResponseDto {
                 LocalDateTime createAt,
                 Double averageScore,
                 int commentSize,
-                List<EvaluationResponseDto> evaluations,
+                List<EvaluationSummaryResponseDto> evaluations,
                 MemberDto member,
                 Long viewCount) {
                 this.id = id;

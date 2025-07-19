@@ -4,7 +4,7 @@ import com.example.resume.cv.domain.ResumeDocument;
 import com.example.resume.cv.dto.ResumeMapper;
 import com.example.resume.cv.search.ResumeSearchRepository;
 import com.example.resume.evaluation.domain.Evaluation;
-import com.example.resume.evaluation.dto.EvaluationResponseDto;
+import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
 import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.openAI.service.OpenAIService;
 import com.example.resume.cv.domain.Resume;
@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -185,8 +184,8 @@ public class ResumeService {
     /*******private method*******/
     private ResumeResponseDto buildResumeResponseDto(Resume resume) {
         List<Evaluation> evaluations = resume.getEvaluations();
-        List<EvaluationResponseDto> evaluationDtos = evaluations.stream()
-                .map(EvaluationResponseDto::fromEntity)
+        List<EvaluationSummaryResponseDto> evaluationDtos = evaluations.stream()
+                .map(EvaluationSummaryResponseDto::fromEntity)
                 .toList();
 
         double averageScore = calculateAverageScore(evaluations);

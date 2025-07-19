@@ -2,7 +2,8 @@ package com.example.resume.evaluation.service;
 
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.cv.domain.Resume;
-import com.example.resume.evaluation.dto.EvaluationRequestDto;
+import com.example.resume.evaluation.dto.EvaluationDto;
+import com.example.resume.evaluation.dto.EvaluationUpdateResponseDto;
 import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.user.domain.Member;
@@ -19,7 +20,7 @@ public class EvaluationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void evaluate(Long resumeId, EvaluationRequestDto evaluationRequestDto, Long memberId) {
+    public void evaluate(Long resumeId, EvaluationDto evaluationRequestDto, Long memberId) {
         Resume resume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
         Member member = validateMember(memberId);
         Evaluation evaluation = Evaluation.builder()
@@ -35,7 +36,8 @@ public class EvaluationService {
         evaluationRepository.deleteById(evaluationId);
     }
 
-    public void update(Long evaluationId, EvaluationRequestDto evaluationRequestDto, Long memberId) {
+    @Transactional
+    public void update(Long evaluationId, EvaluationDto evaluationRequestDto, Long memberId) {
         validateMember(memberId);
         evaluationRepository.findById(evaluationId)
                 .ifPresent(evaluation -> {
