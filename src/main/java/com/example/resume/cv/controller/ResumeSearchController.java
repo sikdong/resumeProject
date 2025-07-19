@@ -1,8 +1,8 @@
 package com.example.resume.cv.controller;
 
-import com.example.resume.cv.domain.Resume;
 import com.example.resume.cv.domain.ResumeDocument;
 import com.example.resume.cv.dto.ResumeResponseDto;
+import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.cv.search.ResumeSearchRepository;
 import com.example.resume.cv.service.ResumeService;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +19,18 @@ import java.util.List;
 public class ResumeSearchController {
     private final ResumeSearchRepository resumeSearchRepository;
     private final ResumeService resumeService;
+    private final ResumeRepository resumeRepository;
 
     @GetMapping("/keyword")
     public List<ResumeResponseDto> search(@RequestParam String keyword) {
+        if(keyword.isBlank()){
+           return resumeService.getAllResumes();
+        }
         List<ResumeDocument> resumeDocuments = resumeSearchRepository.findByKeywordContaining(keyword);
         List<Long> ids = resumeDocuments.stream()
                 .map(ResumeDocument::getId)
                 .map(Long::valueOf)
                 .toList();
-        return resumeService.getResumesByIds(ids);
+            return resumeService.getResumesByIds(ids);
     }
-
 }
