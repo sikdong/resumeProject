@@ -56,7 +56,7 @@ public class ResumeService {
         String fileUrl = saveFile(request, decodedContent);
         log.info("파일이 성공적으로 저장되었습니다. fileUrl: {}", fileUrl);
         
-        String keyword = openAIService.getResumeKeyword(content);
+        //String keyword = openAIService.getResumeKeyword(content);
         /*Resume resume = Resume.builder()
                 .member(member)
                 .title(request.title())

@@ -80,7 +80,7 @@ public class OpenAIService {
         String truncatedText = processedText.length() > 5000 ? 
             processedText.substring(0, 5000) : processedText;
 
-        String script = "다음 이력서에서 핵심 키워드를 추출해줘:\n\n" + truncatedText +
+        /*String script = "다음 이력서에서 핵심 키워드를 추출해줘:\n\n" + truncatedText +
                 "\n\n 응답은 중요도 순으로 정렬해서 키워드 3개만 ,로 구분해서 줘";
 
         // API 키 유효성 검사
@@ -127,7 +127,8 @@ public class OpenAIService {
 
             Map<String, Object> messageResult = (Map<String, Object>) choices.get(0).get("message");
             return (String) messageResult.get("content");
-        }
+        }*/
+        return "";
     }
 
     @Async
