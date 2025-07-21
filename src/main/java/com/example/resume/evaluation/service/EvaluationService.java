@@ -2,7 +2,8 @@ package com.example.resume.evaluation.service;
 
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.cv.domain.Resume;
-import com.example.resume.evaluation.dto.EvaluationRequestDto;
+import com.example.resume.evaluation.dto.EvaluationDto;
+import com.example.resume.evaluation.dto.EvaluationUpdateResponseDto;
 import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.user.domain.Member;
@@ -10,6 +11,8 @@ import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,7 @@ public class EvaluationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void evaluate(Long resumeId, EvaluationRequestDto evaluationRequestDto, Long memberId) {
+    public void evaluate(Long resumeId, EvaluationDto evaluationRequestDto, Long memberId) {
         Resume resume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
         Member member = validateMember(memberId);
         Evaluation evaluation = Evaluation.builder()
@@ -31,11 +34,13 @@ public class EvaluationService {
         evaluationRepository.save(evaluation);
     }
 
+    @Transactional
     public void deleteEvaluation(Long evaluationId) {
         evaluationRepository.deleteById(evaluationId);
     }
 
-    public void update(Long evaluationId, EvaluationRequestDto evaluationRequestDto, Long memberId) {
+    @Transactional
+    public void update(Long evaluationId, EvaluationDto evaluationRequestDto, Long memberId) {
         validateMember(memberId);
         evaluationRepository.findById(evaluationId)
                 .ifPresent(evaluation -> {
@@ -44,9 +49,21 @@ public class EvaluationService {
                 });
     }
 
+    public EvaluationDto getEvaluation(Long evaluationId) {
+        Evaluation evaluation = evaluationRepository.findById(evaluationId)
+                .orElseThrow(() -> new IllegalArgumentException("평가가 존재하지 않습니다 === " + evaluationId));
+        return EvaluationDto.fromEntity(evaluation);
+    }
+
+    public List<EvaluationUpdateResponseDto> getMyEvaluations(Long memberId) {
+        return evaluationRepository.findByMemberIdWithResume(memberId)
+                .stream()
+                .map(EvaluationUpdateResponseDto::fromEntity)
+                .toList();
+    }
+
     /********private method*********/
     private Member validateMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
     }
-
 }

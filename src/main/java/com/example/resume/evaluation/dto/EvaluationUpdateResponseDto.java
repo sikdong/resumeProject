@@ -4,20 +4,22 @@ import com.example.resume.evaluation.domain.Evaluation;
 
 import java.time.LocalDateTime;
 
-public record EvaluationResponseDto(
+public record EvaluationUpdateResponseDto(
         Long id,
         Double score,
         LocalDateTime evaluatedAt,
         String comment,
-        String memberName
+        String resumeTitle,
+        Long resumeId
 ) {
-    public static EvaluationResponseDto fromEntity(Evaluation evaluation){
-        return new EvaluationResponseDto(
+    public static EvaluationUpdateResponseDto fromEntity(Evaluation evaluation){
+        return new EvaluationUpdateResponseDto(
                 evaluation.getId(),
                 evaluation.getScore(),
                 evaluation.getCreatedAt(),
                 evaluation.getComment(),
-                evaluation.getEvaluator().getName()
+                evaluation.getResume().getTitle(),
+                evaluation.getResume().getId()
         );
     }
 }
