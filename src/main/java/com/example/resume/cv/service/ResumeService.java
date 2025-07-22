@@ -21,6 +21,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,8 +52,16 @@ public class ResumeService {
     @Transactional
     public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
         Member member = findMemberById(userId);
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         byte[] decodedContent = decodeBase64Content(content);
+        stopWatch.stop();
+        log.info("파일 디코딩 실행시간 ==== {} ", stopWatch.getTotalTimeMillis());
+        stopWatch = new StopWatch();
+        stopWatch.start();
         String fileUrl = saveFile(request, decodedContent);
+        stopWatch.stop();
+        log.info("파일 로컬에 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
         log.info("파일이 성공적으로 저장되었습니다. fileUrl: {}", fileUrl);
         
         //String keyword = openAIService.getResumeKeyword(content);
@@ -62,20 +71,27 @@ public class ResumeService {
                 .fileUrl(fileUrl)
                 .keyword(keyword)
                 .build();*/
+        stopWatch = new StopWatch();
+        stopWatch.start();
         //FIXME
         Resume resume = Resume.builder()
                 .member(member)
                 .title(request.title())
                 .fileUrl(fileUrl)
-                .keyword("java")
                 .build();
         save(resume);
+        stopWatch.stop();
+        log.info("엔티티 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
     }
 
     private void save(Resume resume){
         Resume saved = resumeRepository.save(resume);
         ResumeDocument document = resumeMapper.toDocument(saved);
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         resumeSearchRepository.save(document);
+        stopWatch.stop();
+        log.info("엘라스틱 객체 ==== {} ", stopWatch.getTotalTimeMillis());
     }
 
     private Member findMemberById(Long userId) {
