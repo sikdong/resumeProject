@@ -17,6 +17,6 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
     @Query("Delete FROM Evaluation e WHERE e.resume.id = :resumeId")
     void deleteAllByResumeId(Long resumeId);
 
-    @Query("SELECT e FROM Evaluation e LEFT JOIN FETCH e.resume WHERE e.evaluator.id = :memberId")
+    @Query("SELECT e FROM Evaluation e LEFT JOIN FETCH e.resume WHERE e.evaluator.id = :memberId ORDER BY e.createdAt desc")
     List<Evaluation> findByMemberIdWithResume(Long memberId);
 }
