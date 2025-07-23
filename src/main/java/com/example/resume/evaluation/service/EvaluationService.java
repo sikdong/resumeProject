@@ -1,5 +1,7 @@
 package com.example.resume.evaluation.service;
 
+import com.example.resume.common.annotation.LogExecutionTime;
+import com.example.resume.cv.service.EmailService;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.cv.domain.Resume;
 import com.example.resume.evaluation.dto.EvaluationDto;
@@ -20,8 +22,10 @@ public class EvaluationService {
     private final ResumeRepository resumeRepository;
     private final EvaluationRepository evaluationRepository;
     private final MemberRepository memberRepository;
+    private final EmailService emailService;
 
     @Transactional
+    @LogExecutionTime
     public void evaluate(Long resumeId, EvaluationDto evaluationRequestDto, Long memberId) {
         Resume resume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
         Member member = validateMember(memberId);
@@ -31,6 +35,9 @@ public class EvaluationService {
                 .comment(evaluationRequestDto.getComment())
                 .evaluator(member)
                 .build();
+        String toEmail = resume.getMember().getEmail();
+        String resumeTitle = resume.getTitle();
+        emailService.sendReviewNotification(toEmail, resumeTitle);
         evaluationRepository.save(evaluation);
     }
 
