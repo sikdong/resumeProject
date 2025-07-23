@@ -1,6 +1,8 @@
 package com.example.resume.user.service;
 
 import com.example.resume.enums.CareerLevel;
+import com.example.resume.token.domain.RefreshToken;
+import com.example.resume.token.repository.RefreshTokenRepository;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.dto.UserAdditionalInfoRequestDto;
 import com.example.resume.user.repository.MemberRepository;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     @Value("${app.url.additional-form}")
     private String additionalFormUrl;
 
@@ -55,5 +58,15 @@ public class MemberService {
     private Member getMember(Long userId) {
         return memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("User with id " + userId + " not found"));
+    }
+
+    @Transactional
+    public void setRefreshToken(Long memberId, String refreshToken) {
+        refreshTokenRepository.findById(memberId)
+            .ifPresentOrElse(token -> token.setToken(refreshToken),
+                    () -> refreshTokenRepository.save(RefreshToken.builder().
+                            memberId(memberId).
+                            token(refreshToken)
+                            .build()));
     }
 }

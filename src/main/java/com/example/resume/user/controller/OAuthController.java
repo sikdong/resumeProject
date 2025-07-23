@@ -31,17 +31,8 @@ public class OAuthController {
         String accessToken = jwtUtil.createAccessToken(member);
         String refreshToken = jwtUtil.createRefreshToken(member);
 
-        refreshTokenRepository.findById(member.getId())
-                .ifPresentOrElse(token -> token.setToken(refreshToken),
-                        () -> refreshTokenRepository.save(RefreshToken.builder().
-                                memberId(member.getId()).
-                                token(refreshToken)
-                                .build()));
-
-        String redirectUrl = memberService.getRedirectUrl(response, member);
-
-        redirectUrl += "?token=" + accessToken+"&refreshToken="+refreshToken;
-
+        memberService.setRefreshToken(member.getId(), refreshToken);
+        String redirectUrl = memberService.getRedirectUrl(response, member) + "?token=" + accessToken+"&refreshToken="+refreshToken;
         response.sendRedirect(redirectUrl);
     }
 }
