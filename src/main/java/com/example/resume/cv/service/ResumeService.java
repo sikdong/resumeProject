@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -192,12 +193,28 @@ public class ResumeService {
     @Transactional
     @CacheEvict(value = "resumeList", allEntries = true)
     public void deleteResume(Long resumeId) {
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new IllegalArgumentException("이력서가 존재하지 않습니다 == " + resumeId));
+        deleteFile(resume);
         evaluationRepository.deleteAllByResumeId(resumeId);;
         resumeSearchRepository.deleteById(String.valueOf(resumeId));
         resumeRepository.deleteById(resumeId);
     }
 
+
+
     /*******private method*******/
+    private void deleteFile(Resume resume) {
+        String path = resume.getFileUrl();
+        File file = new File(path);
+        if (file.exists()) {
+            boolean deleted = file.delete();
+            if (!deleted) {
+                throw new RuntimeException("파일 삭제 실패: " + path);
+            }
+        }
+    }
+
     private ResumeResponseDto buildResumeResponseDto(Resume resume) {
         List<Evaluation> evaluations = resume.getEvaluations();
         List<EvaluationSummaryResponseDto> evaluationDtos = evaluations.stream()
