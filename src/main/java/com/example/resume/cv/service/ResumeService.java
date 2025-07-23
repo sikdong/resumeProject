@@ -1,17 +1,16 @@
 package com.example.resume.cv.service;
 
-import com.example.resume.cv.domain.ResumeDocument;
-import com.example.resume.cv.dto.ResumeMapper;
-import com.example.resume.cv.search.ResumeSearchRepository;
-import com.example.resume.evaluation.domain.Evaluation;
-import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
-import com.example.resume.evaluation.repository.EvaluationRepository;
-import com.example.resume.openAI.service.OpenAIService;
+import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.dto.ResumeMapper;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.cv.service.support.ResumeViewManager;
+import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
+import com.example.resume.evaluation.repository.EvaluationRepository;
+import com.example.resume.openAI.service.OpenAIService;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
@@ -42,15 +41,14 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final OpenAIService openAIService;
     private final ResumeViewManager resumeViewManager;
-    private final ResumeMapper resumeMapper;
     private final EvaluationRepository evaluationRepository;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-    private final ResumeSearchRepository resumeSearchRepository;
 
     @CacheEvict(value = "resumeList", allEntries = true)
     @Transactional
+    @LogExecutionTime
     public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
         Member member = findMemberById(userId);
         StopWatch stopWatch = new StopWatch();
@@ -80,19 +78,9 @@ public class ResumeService {
                 .title(request.title())
                 .fileUrl(fileUrl)
                 .build();
-        save(resume);
+        resumeRepository.save(resume);
         stopWatch.stop();
         log.info("엔티티 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
-    }
-
-    private void save(Resume resume){
-        Resume saved = resumeRepository.save(resume);
-        ResumeDocument document = resumeMapper.toDocument(saved);
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-        resumeSearchRepository.save(document);
-        stopWatch.stop();
-        log.info("엘라스틱 객체 ==== {} ", stopWatch.getTotalTimeMillis());
     }
 
     private Member findMemberById(Long userId) {
@@ -197,7 +185,7 @@ public class ResumeService {
                 .orElseThrow(() -> new IllegalArgumentException("이력서가 존재하지 않습니다 == " + resumeId));
         deleteFile(resume);
         evaluationRepository.deleteAllByResumeId(resumeId);;
-        resumeSearchRepository.deleteById(String.valueOf(resumeId));
+        //resumeSearchRepository.deleteById(String.valueOf(resumeId));
         resumeRepository.deleteById(resumeId);
     }
 
