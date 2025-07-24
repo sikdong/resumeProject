@@ -107,7 +107,7 @@ class ResumeServiceTest {
     @DisplayName("이력서 업로드 성공 테스트")
     void uploadResumeSuccess() throws IOException {
         // given
-        ResumeUploadRequestDto requestDto = new ResumeUploadRequestDto("테스트 이력서", "test.pdf", "test");
+        ResumeUploadRequestDto requestDto = new ResumeUploadRequestDto("테스트 이력서", "test.pdf", "test", "test");
         String content = "테스트 내용";
         given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
         given(openAIService.getResumeKeyword(any())).willReturn("Java, Spring");
@@ -124,7 +124,7 @@ class ResumeServiceTest {
     @DisplayName("존재하지 않는 회원으로 이력서 업로드 시 예외 발생")
     void uploadResumeWithInvalidMember() {
         // given
-        ResumeUploadRequestDto requestDto = new ResumeUploadRequestDto("테스트 이력서", "test.pdf", "test");
+        ResumeUploadRequestDto requestDto = new ResumeUploadRequestDto("테스트 이력서", "test.pdf", "test", "test");
         given(memberRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then

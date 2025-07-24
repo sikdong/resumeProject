@@ -1,16 +1,16 @@
 package com.example.resume.cv.service;
 
-import com.example.resume.cv.domain.ResumeDocument;
-import com.example.resume.cv.dto.ResumeMapper;
-import com.example.resume.evaluation.domain.Evaluation;
-import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
-import com.example.resume.evaluation.repository.EvaluationRepository;
-import com.example.resume.openAI.service.OpenAIService;
+import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.dto.ResumeMapper;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.cv.service.support.ResumeViewManager;
+import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
+import com.example.resume.evaluation.repository.EvaluationRepository;
+import com.example.resume.openAI.service.OpenAIService;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
@@ -84,15 +84,6 @@ public class ResumeService {
         log.info("엔티티 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
     }
 
-    private void save(Resume resume){
-        Resume saved = resumeRepository.save(resume);
-        ResumeDocument document = resumeMapper.toDocument(saved);
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-        stopWatch.stop();
-        log.info("엘라스틱 객체 ==== {} ", stopWatch.getTotalTimeMillis());
-    }
-
     private Member findMemberById(Long userId) {
         return memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId: " + userId));
@@ -146,12 +137,12 @@ public class ResumeService {
     @Transactional(readOnly = true)
     @CacheEvict(value = "resumeList", allEntries = true)
     public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
-        Resume resume = findResumeByIdWithEvaluation(resumeId);
+        Resume resume = findByIdWithEvaluation(resumeId);
         resumeViewManager.processViewCount(resumeId, memberId, clientIp);
         return buildResumeResponseDto(resume);
     }
 
-    private Resume findResumeByIdWithEvaluation(Long resumeId) {
+    private Resume findByIdWithEvaluation(Long resumeId) {
         return resumeRepository.findByIdWithEvaluation(resumeId)
                 .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다. resumeId: " + resumeId));
     }
@@ -160,9 +151,7 @@ public class ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getAllResumes() {
         List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
-        return resumesWithEvaluation.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
+        return getResumeResponseDtos(resumesWithEvaluation);
     }
 
     @Transactional(readOnly = true)
@@ -175,17 +164,13 @@ public class ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getMyResumes(Long memberId) {
         List<Resume> resumes = resumeRepository.findByMemberIdWithEvaluation(memberId);
-        return resumes.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
+        return getResumeResponseDtos(resumes);
     }
 
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getResumesByIds(List<Long> ids) {
         List<Resume> resumes = resumeRepository.findAllWithEvaluationByIdIn(ids);
-        return resumes.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
+        return getResumeResponseDtos(resumes);
     }
 
     @Transactional
@@ -197,8 +182,11 @@ public class ResumeService {
         evaluationRepository.deleteAllByResumeId(resumeId);;
         resumeRepository.deleteById(resumeId);
     }
-
-
+    @LogExecutionTime
+    public List<ResumeResponseDto> getAllResumesContainingTitle(String title) {
+        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluationContainingTitle(title);
+        return getResumeResponseDtos(resumesWithEvaluation);
+    }
 
     /*******private method*******/
     private void deleteFile(Resume resume) {
@@ -256,5 +244,11 @@ public class ResumeService {
                 .orElse(0.0);
         
         return Math.round(average * 10) / 10.0;
+    }
+
+    private List<ResumeResponseDto> getResumeResponseDtos(List<Resume> resumesWithEvaluation) {
+        return resumesWithEvaluation.stream()
+                .map(this::buildResumeResponseDto)
+                .toList();
     }
 }

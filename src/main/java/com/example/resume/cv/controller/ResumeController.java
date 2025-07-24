@@ -34,6 +34,14 @@ public class ResumeController {
         return ResponseEntity.ok(resumeResponseDtos);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ResumeResponseDto>> searchResumesContainingTitle (@RequestParam String title) {
+        if (title.isBlank()) {
+            return ResponseEntity.ok(resumeService.getAllResumes());
+        }
+        return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title));
+    }
+
     @GetMapping("/{resumeId}")
     public ResponseEntity<ResumeResponseDto> getResume (@PathVariable Long resumeId,
                                                         Authentication authentication,
