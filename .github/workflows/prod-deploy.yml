@@ -1,0 +1,36 @@
+name: Deploy to EC2 (with systemd)
+
+on:
+  push:
+    branches: [ master ]  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4  # 최신 버전
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'  # 사용 중인 Java 버전에 맞게 설정
+
+    - name: Build with Gradle
+      run: ./gradlew clean build -x test
+
+    - name: Add SSH private key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      run: |
+        scp build/libs/*.jar ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/resume-0.0.1-SNAPSHOT.jar
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+          sudo systemctl restart myapp
+        EOF
