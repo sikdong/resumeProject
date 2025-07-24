@@ -1,9 +1,9 @@
 package com.example.resume.cv.domain;
+
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.user.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -20,6 +20,9 @@ public class Resume {
     private Long id;
     private String title;
     private String fileUrl;
+
+    @Column(columnDefinition = "varchar(255) default ''")
+    private String comment;
 
     @Column(columnDefinition = "varchar(255) default ''")
     private String keyword;

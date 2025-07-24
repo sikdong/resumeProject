@@ -1,6 +1,7 @@
 package com.example.resume.cv.controller;
 
 import com.example.resume.common.MemberUtil;
+import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.service.ResumeService;
@@ -71,6 +72,7 @@ public class ResumeController {
     }
 
     @PostMapping("/upload")
+    @LogExecutionTime
     public ResponseEntity<String> uploadResume (
             @RequestBody ResumeUploadRequestDto request,
             Authentication authentication) throws IOException {

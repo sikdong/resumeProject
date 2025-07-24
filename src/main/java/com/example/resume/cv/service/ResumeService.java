@@ -2,7 +2,6 @@ package com.example.resume.cv.service;
 
 import com.example.resume.cv.domain.ResumeDocument;
 import com.example.resume.cv.dto.ResumeMapper;
-import com.example.resume.cv.search.ResumeSearchRepository;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
 import com.example.resume.evaluation.repository.EvaluationRepository;
@@ -47,7 +46,6 @@ public class ResumeService {
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-    private final ResumeSearchRepository resumeSearchRepository;
 
     @CacheEvict(value = "resumeList", allEntries = true)
     @Transactional
@@ -78,9 +76,10 @@ public class ResumeService {
         Resume resume = Resume.builder()
                 .member(member)
                 .title(request.title())
+                .comment(request.comment())
                 .fileUrl(fileUrl)
                 .build();
-        save(resume);
+        resumeRepository.save(resume);
         stopWatch.stop();
         log.info("엔티티 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
     }
@@ -90,7 +89,6 @@ public class ResumeService {
         ResumeDocument document = resumeMapper.toDocument(saved);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        resumeSearchRepository.save(document);
         stopWatch.stop();
         log.info("엘라스틱 객체 ==== {} ", stopWatch.getTotalTimeMillis());
     }
@@ -197,7 +195,6 @@ public class ResumeService {
                 .orElseThrow(() -> new IllegalArgumentException("이력서가 존재하지 않습니다 == " + resumeId));
         deleteFile(resume);
         evaluationRepository.deleteAllByResumeId(resumeId);;
-        resumeSearchRepository.deleteById(String.valueOf(resumeId));
         resumeRepository.deleteById(resumeId);
     }
 
