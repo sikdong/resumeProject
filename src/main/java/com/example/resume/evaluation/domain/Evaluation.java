@@ -4,6 +4,8 @@ import com.example.resume.user.domain.Member;
 import com.example.resume.cv.domain.Resume;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,8 +20,6 @@ public class Evaluation {
     @Lob
     private String comment;
 
-    private LocalDateTime createdAt;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resume_id")
     private Resume resume;
@@ -28,14 +28,8 @@ public class Evaluation {
     @JoinColumn(name = "member_id")
     private Member evaluator;
 
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP(6)")
+    private LocalDateTime createdAt;
 }
 
