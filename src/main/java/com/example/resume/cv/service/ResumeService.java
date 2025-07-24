@@ -219,7 +219,8 @@ public class ResumeService {
                 commentCount,
                 evaluationDtos,
                 MemberDto.fromEntity(resume.getMember()),
-                resume.getViewCount()
+                resume.getViewCount(),
+                resume.getComment()
         );
     }
 

@@ -31,6 +31,7 @@ public class ResumeResponseDto {
         @JsonInclude(NON_EMPTY)
         private MemberDto member;
         private Long viewCount;
+        private String comment;
 
         @Builder
         public ResumeResponseDto(
@@ -43,7 +44,8 @@ public class ResumeResponseDto {
                 int commentSize,
                 List<EvaluationSummaryResponseDto> evaluations,
                 MemberDto member,
-                Long viewCount) {
+                Long viewCount,
+                String comment) {
                 this.id = id;
                 this.title = title;
                 this.fileUrl = fileUrl;
@@ -54,5 +56,6 @@ public class ResumeResponseDto {
                 this.evaluations = evaluations;
                 this.member = member;
                 this.viewCount = viewCount == null ? 0L : viewCount;
+                this.comment = comment;
         }
 }
