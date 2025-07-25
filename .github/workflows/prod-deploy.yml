@@ -65,8 +65,9 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            systemctl restart myapp
-            systemctl status myapp --no-pager
+            sudo systemctl daemon-reload
+            sudo systemctl restart myapp
+            sudo systemctl status myapp --no-pager
 
       - name: Revoke IP from Security Group
         if: always()
