@@ -32,7 +32,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "AWS_DEFAULT_REGION=ap-northeast-3" >> $GITHUB_ENV
-          echo "AWS_SG_ID=sg-08f61071d7ab164a9" >> $GITHUB_ENV
+          echo "AWS_SG_NAME=launch-wizard-1" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,7 +45,7 @@ jobs:
         run: |
           echo "Authorizing IP: ${{ steps.ip.outputs.ipv4 }}/32"
           aws ec2 authorize-security-group-ingress \
-            --group-id ${{ env.AWS_SG_ID }} \
+            --group-id ${{ env.AWS_SG_NAME }} \
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
