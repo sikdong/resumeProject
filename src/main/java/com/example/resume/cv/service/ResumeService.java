@@ -51,18 +51,9 @@ public class ResumeService {
     @Transactional
     public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
         Member member = findMemberById(userId);
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
         byte[] decodedContent = decodeBase64Content(content);
-        stopWatch.stop();
-        log.info("파일 디코딩 실행시간 ==== {} ", stopWatch.getTotalTimeMillis());
-        stopWatch = new StopWatch();
-        stopWatch.start();
         String fileUrl = saveFile(request, decodedContent);
-        stopWatch.stop();
-        log.info("파일 로컬에 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
-        log.info("파일이 성공적으로 저장되었습니다. fileUrl: {}", fileUrl);
-        
+
         //String keyword = openAIService.getResumeKeyword(content);
         /*Resume resume = Resume.builder()
                 .member(member)
@@ -70,8 +61,6 @@ public class ResumeService {
                 .fileUrl(fileUrl)
                 .keyword(keyword)
                 .build();*/
-        stopWatch = new StopWatch();
-        stopWatch.start();
         //FIXME
         Resume resume = Resume.builder()
                 .member(member)
@@ -80,8 +69,6 @@ public class ResumeService {
                 .fileUrl(fileUrl)
                 .build();
         resumeRepository.save(resume);
-        stopWatch.stop();
-        log.info("엔티티 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
     }
 
     private Member findMemberById(Long userId) {
