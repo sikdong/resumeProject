@@ -29,10 +29,11 @@ jobs:
         run: |
           echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
 
+      #
       - name: Set environment variables
         run: |
           echo "AWS_DEFAULT_REGION=ap-northeast-3" >> $GITHUB_ENV
-          echo "AWS_SG_NAME=launch-wizard-1" >> $GITHUB_ENV
+          echo "AWS_SG_NAME=launch-wizard-1" >> $GITHUB_ENV 
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
