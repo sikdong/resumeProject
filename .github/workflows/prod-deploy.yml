@@ -24,21 +24,22 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
-      - name: Get GitHub Actions public IP
+      - name: Get GitHub Actions public IP manually
         id: ip
-        uses: haythem/public-ip@v1.2
+        run: |
+          echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
 
       - name: Set environment variables
         run: |
-          echo "AWS_DEFAULT_REGION=ap-northeast-2" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=ap-northeast-3" >> $GITHUB_ENV
           echo "AWS_SG_ID=sg-08f61071d7ab164a9" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          aws-region: ap-northeast-2
 
       - name: Open SSH port temporarily for GitHub Actions IP
         run: |
