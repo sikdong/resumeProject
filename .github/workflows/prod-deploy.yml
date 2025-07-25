@@ -21,6 +21,13 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: application.yml 정보 넣기
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_PROD_YML }}" | base64 --decode > src/main/resources/application-prod.yml
+          find src    
+
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
