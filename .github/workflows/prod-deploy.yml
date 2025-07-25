@@ -24,10 +24,9 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
-      - name: Get GitHub Actions public IP manually
+      - name: Get GitHub Actions public IP
         id: ip
-        run: |
-          echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+        uses: haythem/public-ip@v1.2
 
       - name: Set environment variables
         run: |
