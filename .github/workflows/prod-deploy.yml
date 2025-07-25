@@ -29,24 +29,23 @@ jobs:
         run: |
           echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
 
-      #
       - name: Set environment variables
         run: |
           echo "AWS_DEFAULT_REGION=ap-northeast-3" >> $GITHUB_ENV
-          echo "AWS_SG_NAME=launch-wizard-1" >> $GITHUB_ENV 
+          echo "AWS_SG_ID=sg-08f61071d7ab164a9" >> $GITHUB_ENV 
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+          aws-region: ap-northeast-3
 
       - name: Open SSH port temporarily for GitHub Actions IP
         run: |
           echo "Authorizing IP: ${{ steps.ip.outputs.ipv4 }}/32"
           aws ec2 authorize-security-group-ingress \
-            --group-name ${{ env.AWS_SG_NAME }} \
+            --group-id ${{ env.AWS_SG_ID }} \
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
@@ -75,7 +74,7 @@ jobs:
         run: |
           echo "Revoking IP: ${{ steps.ip.outputs.ipv4 }}/32"
           aws ec2 revoke-security-group-ingress \
-            --group-name ${{ env.AWS_SG_NAME }} \
+            --group-id ${{ env.AWS_SG_ID }} \
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
