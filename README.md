@@ -30,6 +30,8 @@
 <br>
 
 ### 아키텍쳐
+<img width="900" height="400" alt="image" src="https://github.com/user-attachments/assets/7e5fdcb7-cadb-4e38-9bcc-aa6128daa7e1" />
+
 <br>
 
 ### ERD
