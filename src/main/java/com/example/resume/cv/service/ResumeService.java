@@ -2,7 +2,6 @@ package com.example.resume.cv.service;
 
 import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.domain.Resume;
-import com.example.resume.cv.dto.ResumeMapper;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
@@ -20,7 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,13 +40,12 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final OpenAIService openAIService;
     private final ResumeViewManager resumeViewManager;
-    private final ResumeMapper resumeMapper;
     private final EvaluationRepository evaluationRepository;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-    @CacheEvict(value = "resumeList", allEntries = true)
+    /*@CacheEvict(value = "resumeList", allEntries = true)
     @Transactional
     public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
         Member member = findMemberById(userId);
@@ -55,17 +53,35 @@ public class ResumeService {
         String fileUrl = saveFile(request, decodedContent);
 
         //String keyword = openAIService.getResumeKeyword(content);
-        /*Resume resume = Resume.builder()
+        *//*Resume resume = Resume.builder()
                 .member(member)
                 .title(request.title())
                 .fileUrl(fileUrl)
                 .keyword(keyword)
-                .build();*/
+                .build();*//*
         //FIXME
         Resume resume = Resume.builder()
                 .member(member)
                 .title(request.title())
                 .comment(request.comment())
+                .fileUrl(fileUrl)
+                .build();
+        resumeRepository.save(resume);
+    }*/
+
+
+    @LogExecutionTime
+    @Transactional
+    public void uploadFile(Long memberId, MultipartFile file, String title, String comment) throws IOException {
+        Member member = findMemberById(memberId);
+        // 파일 처리 로직
+        String originalFileName = file.getOriginalFilename();
+        byte[] fileBytes = file.getBytes();
+        String fileUrl = saveFile(originalFileName, fileBytes);
+        Resume resume = Resume.builder()
+                .member(member)
+                .title(title)
+                .comment(comment)
                 .fileUrl(fileUrl)
                 .build();
         resumeRepository.save(resume);
@@ -94,7 +110,7 @@ public class ResumeService {
         }
     }
 
-    private String saveFile(ResumeUploadRequestDto request, byte[] decodedBytes) {
+    /*private String saveFile(ResumeUploadRequestDto request, byte[] decodedBytes) {
         try {
             String datePath = LocalDate.now().format(DATE_FORMATTER);
             String fileName = generateUniqueFileName(request.fileName());
@@ -103,6 +119,22 @@ public class ResumeService {
             createDirectoriesIfNotExists(filePath);
             Files.write(filePath, decodedBytes);
             
+            return filePath.toString();
+        } catch (IOException e) {
+            log.error("파일 저장 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("파일 저장에 실패했습니다.", e);
+        }
+    }*/
+
+    private String saveFile(String originalFileName, byte[] decodedBytes) {
+        try {
+            String datePath = LocalDate.now().format(DATE_FORMATTER);
+            String fileName = generateUniqueFileName(originalFileName);
+            Path filePath = Paths.get(UPLOAD_DIR, datePath, fileName);
+
+            createDirectoriesIfNotExists(filePath);
+            Files.write(filePath, decodedBytes);
+
             return filePath.toString();
         } catch (IOException e) {
             log.error("파일 저장 중 오류가 발생했습니다.", e);

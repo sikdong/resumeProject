@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -79,7 +80,7 @@ public class ResumeController {
         }
     }
 
-    @PostMapping("/upload")
+/*    @PostMapping("/upload")
     @LogExecutionTime
     public ResponseEntity<String> uploadResume (
             @RequestBody ResumeUploadRequestDto request,
@@ -88,7 +89,20 @@ public class ResumeController {
         String content = request.content().split(",")[1];
         resumeService.uploadResume(memberId, request, content);
         return ResponseEntity.ok("파일 업로드 성공");
+    }*/
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadResume(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("comment") String comment,
+            Authentication authentication
+    ) throws IOException {
+        Long memberId = MemberUtil.getMemberId(authentication);
+        resumeService.uploadFile(memberId, file, title, comment);
+        return ResponseEntity.ok("파일 업로드 성공");
     }
+
 
     @DeleteMapping("/{resumeId}")
     public ResponseEntity<Void> deleteResume(@PathVariable Long resumeId){
