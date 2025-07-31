@@ -1,6 +1,7 @@
 package com.example.resume.cv.domain;
 
 import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.recruit.domain.Recruit;
 import com.example.resume.user.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,6 +41,9 @@ public class Resume {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
+    List<Recruit> recruits;
 
     @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")
