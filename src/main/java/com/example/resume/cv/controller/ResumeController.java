@@ -1,9 +1,7 @@
 package com.example.resume.cv.controller;
 
 import com.example.resume.common.MemberUtil;
-import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.dto.ResumeResponseDto;
-import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.service.ResumeService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -79,17 +77,6 @@ public class ResumeController {
             return ResponseEntity.notFound().build();
         }
     }
-
-/*    @PostMapping("/upload")
-    @LogExecutionTime
-    public ResponseEntity<String> uploadResume (
-            @RequestBody ResumeUploadRequestDto request,
-            Authentication authentication) throws IOException {
-        Long memberId = MemberUtil.getMemberId(authentication);
-        String content = request.content().split(",")[1];
-        resumeService.uploadResume(memberId, request, content);
-        return ResponseEntity.ok("파일 업로드 성공");
-    }*/
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadResume(

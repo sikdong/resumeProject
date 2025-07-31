@@ -45,36 +45,11 @@ public class ResumeService {
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-    /*@CacheEvict(value = "resumeList", allEntries = true)
-    @Transactional
-    public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
-        Member member = findMemberById(userId);
-        byte[] decodedContent = decodeBase64Content(content);
-        String fileUrl = saveFile(request, decodedContent);
-
-        //String keyword = openAIService.getResumeKeyword(content);
-        *//*Resume resume = Resume.builder()
-                .member(member)
-                .title(request.title())
-                .fileUrl(fileUrl)
-                .keyword(keyword)
-                .build();*//*
-        //FIXME
-        Resume resume = Resume.builder()
-                .member(member)
-                .title(request.title())
-                .comment(request.comment())
-                .fileUrl(fileUrl)
-                .build();
-        resumeRepository.save(resume);
-    }*/
-
-
+    @CacheEvict(value = "resumeList", allEntries = true)
     @LogExecutionTime
     @Transactional
     public void uploadFile(Long memberId, MultipartFile file, String title, String comment) throws IOException {
         Member member = findMemberById(memberId);
-        // 파일 처리 로직
         String originalFileName = file.getOriginalFilename();
         byte[] fileBytes = file.getBytes();
         String fileUrl = saveFile(originalFileName, fileBytes);
@@ -91,40 +66,6 @@ public class ResumeService {
         return memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId: " + userId));
     }
-
-    private byte[] decodeBase64Content(String content) {
-        try {
-            // Base64 메타 데이터 제거 (예: data:[MIME 타입];base64,)
-            if (content.contains(",")) {
-                content = content.split(",", 2)[1];
-            }
-
-            // Base64 입력 값 유효성 검증 (기본적으로 공백 제거)
-            content = content.trim();
-
-            // 디코딩 후 반환
-            return java.util.Base64.getDecoder().decode(content);
-        } catch (IllegalArgumentException e) {
-            log.error("Base64 디코딩에 실패했습니다. 입력 데이터가 잘못되었습니다.", e);
-            throw new IllegalArgumentException("잘못된 파일 형식입니다.(Base64 데이터가 유효하지 않음)", e);
-        }
-    }
-
-    /*private String saveFile(ResumeUploadRequestDto request, byte[] decodedBytes) {
-        try {
-            String datePath = LocalDate.now().format(DATE_FORMATTER);
-            String fileName = generateUniqueFileName(request.fileName());
-            Path filePath = Paths.get(UPLOAD_DIR, datePath, fileName);
-            
-            createDirectoriesIfNotExists(filePath);
-            Files.write(filePath, decodedBytes);
-            
-            return filePath.toString();
-        } catch (IOException e) {
-            log.error("파일 저장 중 오류가 발생했습니다.", e);
-            throw new RuntimeException("파일 저장에 실패했습니다.", e);
-        }
-    }*/
 
     private String saveFile(String originalFileName, byte[] decodedBytes) {
         try {
@@ -183,12 +124,6 @@ public class ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getMyResumes(Long memberId) {
         List<Resume> resumes = resumeRepository.findByMemberIdWithEvaluation(memberId);
-        return getResumeResponseDtos(resumes);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ResumeResponseDto> getResumesByIds(List<Long> ids) {
-        List<Resume> resumes = resumeRepository.findAllWithEvaluationByIdIn(ids);
         return getResumeResponseDtos(resumes);
     }
 
