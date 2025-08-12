@@ -2,7 +2,6 @@ package com.example.resume.cv.service;
 
 import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.domain.Resume;
-import com.example.resume.cv.dto.ResumeMapper;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
@@ -20,7 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,40 +46,20 @@ public class ResumeService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     @CacheEvict(value = "resumeList", allEntries = true)
-    @Transactional
     @LogExecutionTime
-    public void uploadResume(Long userId, ResumeUploadRequestDto request, String content) throws IOException {
-        Member member = findMemberById(userId);
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-        byte[] decodedContent = decodeBase64Content(content);
-        stopWatch.stop();
-        log.info("파일 디코딩 실행시간 ==== {} ", stopWatch.getTotalTimeMillis());
-        stopWatch = new StopWatch();
-        stopWatch.start();
-        String fileUrl = saveFile(request, decodedContent);
-        stopWatch.stop();
-        log.info("파일 로컬에 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
-        log.info("파일이 성공적으로 저장되었습니다. fileUrl: {}", fileUrl);
-        
-        //String keyword = openAIService.getResumeKeyword(content);
-        /*Resume resume = Resume.builder()
-                .member(member)
-                .title(request.title())
-                .fileUrl(fileUrl)
-                .keyword(keyword)
-                .build();*/
-        stopWatch = new StopWatch();
-        stopWatch.start();
-        //FIXME
+    @Transactional
+    public void uploadFile(Long memberId, MultipartFile file, String title, String comment) throws IOException {
+        Member member = findMemberById(memberId);
+        String originalFileName = file.getOriginalFilename();
+        byte[] fileBytes = file.getBytes();
+        String fileUrl = saveFile(originalFileName, fileBytes);
         Resume resume = Resume.builder()
                 .member(member)
-                .title(request.title())
+                .title(title)
+                .comment(comment)
                 .fileUrl(fileUrl)
                 .build();
         resumeRepository.save(resume);
-        stopWatch.stop();
-        log.info("엔티티 저장시간 ==== {} ", stopWatch.getTotalTimeMillis());
     }
 
     private Member findMemberById(Long userId) {
@@ -88,33 +67,15 @@ public class ResumeService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId: " + userId));
     }
 
-    private byte[] decodeBase64Content(String content) {
-        try {
-            // Base64 메타 데이터 제거 (예: data:[MIME 타입];base64,)
-            if (content.contains(",")) {
-                content = content.split(",", 2)[1];
-            }
-
-            // Base64 입력 값 유효성 검증 (기본적으로 공백 제거)
-            content = content.trim();
-
-            // 디코딩 후 반환
-            return java.util.Base64.getDecoder().decode(content);
-        } catch (IllegalArgumentException e) {
-            log.error("Base64 디코딩에 실패했습니다. 입력 데이터가 잘못되었습니다.", e);
-            throw new IllegalArgumentException("잘못된 파일 형식입니다.(Base64 데이터가 유효하지 않음)", e);
-        }
-    }
-
-    private String saveFile(ResumeUploadRequestDto request, byte[] decodedBytes) {
+    private String saveFile(String originalFileName, byte[] decodedBytes) {
         try {
             String datePath = LocalDate.now().format(DATE_FORMATTER);
-            String fileName = generateUniqueFileName(request.fileName());
+            String fileName = generateUniqueFileName(originalFileName);
             Path filePath = Paths.get(UPLOAD_DIR, datePath, fileName);
-            
+
             createDirectoriesIfNotExists(filePath);
             Files.write(filePath, decodedBytes);
-            
+
             return filePath.toString();
         } catch (IOException e) {
             log.error("파일 저장 중 오류가 발생했습니다.", e);
@@ -136,12 +97,12 @@ public class ResumeService {
     @Transactional(readOnly = true)
     @CacheEvict(value = "resumeList", allEntries = true)
     public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
-        Resume resume = findResumeByIdWithEvaluation(resumeId);
+        Resume resume = findByIdWithEvaluation(resumeId);
         resumeViewManager.processViewCount(resumeId, memberId, clientIp);
         return buildResumeResponseDto(resume);
     }
 
-    private Resume findResumeByIdWithEvaluation(Long resumeId) {
+    private Resume findByIdWithEvaluation(Long resumeId) {
         return resumeRepository.findByIdWithEvaluation(resumeId)
                 .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다. resumeId: " + resumeId));
     }
@@ -150,9 +111,7 @@ public class ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getAllResumes() {
         List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
-        return resumesWithEvaluation.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
+        return getResumeResponseDtos(resumesWithEvaluation);
     }
 
     @Transactional(readOnly = true)
@@ -165,17 +124,7 @@ public class ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getMyResumes(Long memberId) {
         List<Resume> resumes = resumeRepository.findByMemberIdWithEvaluation(memberId);
-        return resumes.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<ResumeResponseDto> getResumesByIds(List<Long> ids) {
-        List<Resume> resumes = resumeRepository.findAllWithEvaluationByIdIn(ids);
-        return resumes.stream()
-                .map(this::buildResumeResponseDto)
-                .toList();
+        return getResumeResponseDtos(resumes);
     }
 
     @Transactional
@@ -185,11 +134,13 @@ public class ResumeService {
                 .orElseThrow(() -> new IllegalArgumentException("이력서가 존재하지 않습니다 == " + resumeId));
         deleteFile(resume);
         evaluationRepository.deleteAllByResumeId(resumeId);;
-        //resumeSearchRepository.deleteById(String.valueOf(resumeId));
         resumeRepository.deleteById(resumeId);
     }
-
-
+    @LogExecutionTime
+    public List<ResumeResponseDto> getAllResumesContainingTitle(String title) {
+        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluationContainingTitle(title);
+        return getResumeResponseDtos(resumesWithEvaluation);
+    }
 
     /*******private method*******/
     private void deleteFile(Resume resume) {
@@ -222,7 +173,8 @@ public class ResumeService {
                 commentCount,
                 evaluationDtos,
                 MemberDto.fromEntity(resume.getMember()),
-                resume.getViewCount()
+                resume.getViewCount(),
+                resume.getComment()
         );
     }
 
@@ -247,5 +199,11 @@ public class ResumeService {
                 .orElse(0.0);
         
         return Math.round(average * 10) / 10.0;
+    }
+
+    private List<ResumeResponseDto> getResumeResponseDtos(List<Resume> resumesWithEvaluation) {
+        return resumesWithEvaluation.stream()
+                .map(this::buildResumeResponseDto)
+                .toList();
     }
 }

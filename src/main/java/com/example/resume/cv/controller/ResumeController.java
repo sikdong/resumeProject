@@ -2,7 +2,6 @@ package com.example.resume.cv.controller;
 
 import com.example.resume.common.MemberUtil;
 import com.example.resume.cv.dto.ResumeResponseDto;
-import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.service.ResumeService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,6 +31,14 @@ public class ResumeController {
     public ResponseEntity<List<ResumeResponseDto>> getAllResumes () {
         List<ResumeResponseDto> resumeResponseDtos = resumeService.getAllResumes();
         return ResponseEntity.ok(resumeResponseDtos);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ResumeResponseDto>> searchResumesContainingTitle (@RequestParam String title) {
+        if (title.isBlank()) {
+            return ResponseEntity.ok(resumeService.getAllResumes());
+        }
+        return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title));
     }
 
     @GetMapping("/{resumeId}")
@@ -71,14 +79,17 @@ public class ResumeController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadResume (
-            @RequestBody ResumeUploadRequestDto request,
-            Authentication authentication) throws IOException {
+    public ResponseEntity<String> uploadResume(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("comment") String comment,
+            Authentication authentication
+    ) throws IOException {
         Long memberId = MemberUtil.getMemberId(authentication);
-        String content = request.content().split(",")[1];
-        resumeService.uploadResume(memberId, request, content);
+        resumeService.uploadFile(memberId, file, title, comment);
         return ResponseEntity.ok("파일 업로드 성공");
     }
+
 
     @DeleteMapping("/{resumeId}")
     public ResponseEntity<Void> deleteResume(@PathVariable Long resumeId){

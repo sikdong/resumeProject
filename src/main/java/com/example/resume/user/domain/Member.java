@@ -3,6 +3,7 @@ package com.example.resume.user.domain;
 import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.cv.domain.Resume;
+import com.example.resume.recruit.domain.Recruit;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -14,8 +15,6 @@ import java.util.List;
 public class Member {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String oauthId;
 
     private String provider;
 
@@ -37,8 +36,11 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Resume> resumes;
 
-    @OneToMany(mappedBy = "evaluator")
+    @OneToMany(mappedBy = "evaluator", fetch = FetchType.LAZY)
     private List<Evaluation> evaluations;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<Recruit> recruits;
 
     public enum Role {
         USER, ADMIN

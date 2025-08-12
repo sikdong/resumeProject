@@ -1,10 +1,13 @@
 package com.example.resume.cv.domain;
+
 import com.example.resume.evaluation.domain.Evaluation;
+import com.example.resume.recruit.domain.Recruit;
 import com.example.resume.user.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,11 +23,19 @@ public class Resume {
     private String fileUrl;
 
     @Column(columnDefinition = "varchar(255) default ''")
+    private String comment;
+
+    @Column(columnDefinition = "varchar(255) default ''")
     private String keyword;
 
     @Column(name = "view_count", columnDefinition = "bigint default 0")
     private Long viewCount;
+    @CreationTimestamp
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP(6)")
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP(6)")
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,19 +43,10 @@ public class Resume {
     private Member member;
 
     @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
+    List<Recruit> recruits;
+
+    @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")
     private List<Evaluation> evaluations;
-
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
 }
 
