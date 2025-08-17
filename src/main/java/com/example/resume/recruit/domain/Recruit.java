@@ -13,7 +13,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 public class Recruit {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(columnDefinition = "varchar(255) default ''")
     private String companyName;

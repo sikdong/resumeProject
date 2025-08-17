@@ -13,6 +13,7 @@ public class RedisConfig {
     public static final String RESUME_VIEW_COUNT_PREFIX = "resumeViewCount:";
     public static final String RESUME_VIEWED_MEMBER_DAY = "viewedMemberDay:";
     public static final String RESUME_VIEWED_NOT_MEMBER = "viewedIp:";
+    public static final String RESUME_RECENTLY_VIEWED_KEY = "recent:user:";
 
     @Bean
     LettuceConnectionFactory connectionFactory() {

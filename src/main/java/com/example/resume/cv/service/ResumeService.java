@@ -2,9 +2,11 @@ package com.example.resume.cv.service;
 
 import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.dto.ResumeRecentlyViewedResponseDto;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.dto.ResumeUploadRequestDto;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
+import com.example.resume.cv.repository.queryDSL.ResumeQueryDSLRepository;
 import com.example.resume.cv.service.support.ResumeViewManager;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.dto.EvaluationSummaryResponseDto;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -41,6 +45,7 @@ public class ResumeService {
     private final OpenAIService openAIService;
     private final ResumeViewManager resumeViewManager;
     private final EvaluationRepository evaluationRepository;
+    private final ResumeQueryDSLRepository resumeQueryDSLRepository;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
@@ -99,6 +104,7 @@ public class ResumeService {
     public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
         Resume resume = findByIdWithEvaluation(resumeId);
         resumeViewManager.processViewCount(resumeId, memberId, clientIp);
+        resumeViewManager.markViewed(memberId, resumeId, Instant.now());
         return buildResumeResponseDto(resume);
     }
 
@@ -140,6 +146,11 @@ public class ResumeService {
     public List<ResumeResponseDto> getAllResumesContainingTitle(String title) {
         List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluationContainingTitle(title);
         return getResumeResponseDtos(resumesWithEvaluation);
+    }
+
+    public List<ResumeRecentlyViewedResponseDto> getRecentlyViewedResumes(Long memberId) {
+        List<Long> recentIds = resumeViewManager.getRecentIds(memberId, 5);
+        return resumeQueryDSLRepository.getRecentlyViewedResumes(recentIds);
     }
 
     /*******private method*******/

@@ -1,6 +1,7 @@
 package com.example.resume.cv.controller;
 
 import com.example.resume.common.MemberUtil;
+import com.example.resume.cv.dto.ResumeRecentlyViewedResponseDto;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.service.ResumeService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -95,5 +97,12 @@ public class ResumeController {
     public ResponseEntity<Void> deleteResume(@PathVariable Long resumeId){
         resumeService.deleteResume(resumeId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/recently-viewed")
+    public ResponseEntity<List<ResumeRecentlyViewedResponseDto>> getRecentlyViewedResumes(Authentication authentication){
+        Long memberId = MemberUtil.getMemberId(authentication);
+        List<ResumeRecentlyViewedResponseDto> recentlyViewedResumes = resumeService.getRecentlyViewedResumes(memberId);
+        return ResponseEntity.ok(recentlyViewedResumes);
     }
 }
