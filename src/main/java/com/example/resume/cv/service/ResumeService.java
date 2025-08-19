@@ -32,7 +32,10 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -150,7 +153,13 @@ public class ResumeService {
 
     public List<ResumeRecentlyViewedResponseDto> getRecentlyViewedResumes(Long memberId) {
         List<Long> recentIds = resumeViewManager.getRecentIds(memberId, 5);
-        return resumeQueryDSLRepository.getRecentlyViewedResumes(recentIds);
+        Map<Long, Integer> order = new HashMap<>();
+        for (int i = 0; i < recentIds.size(); i++) {
+            order.put(recentIds.get(i), i);
+        }
+        List<ResumeRecentlyViewedResponseDto> recentlyViewedResumes = resumeQueryDSLRepository.getRecentlyViewedResumes(recentIds);
+        recentlyViewedResumes.sort(Comparator.comparingInt(r -> order.getOrDefault(r.resumeId(), Integer.MAX_VALUE)));
+        return recentlyViewedResumes;
     }
 
     /*******private method*******/
