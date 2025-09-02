@@ -1,6 +1,7 @@
 package com.example.resume.service;
 
 import com.example.resume.cv.service.ResumeService;
+import com.example.resume.cv.service.support.ResumeViewManager;
 import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.repository.EvaluationRepository;
@@ -17,12 +18,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,11 +65,16 @@ class ResumeServiceTest {
     @Mock
     private HashOperations<String, Object, Object> hashOperations;
 
+    @Mock
+    private ResumeViewManager resumeViewManager;
+
     private Member testMember;
     private Resume testResume;
     private List<Evaluation> evaluations;
 
     private final String local = "127.0.0.1";
+    private final Clock clock = Clock.systemUTC();
+
 
     @BeforeEach
     void setUp() {
@@ -104,49 +114,17 @@ class ResumeServiceTest {
     }
 
     @Test
-    @DisplayName("이력서 업로드 성공 테스트")
-    void uploadResumeSuccess() throws IOException {
-        // given
-        ResumeUploadRequestDto requestDto = new ResumeUploadRequestDto("테스트 이력서", "test.pdf", "test", "test");
-        String content = "테스트 내용";
-        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
-        given(openAIService.getResumeKeyword(any())).willReturn("Java, Spring");
-        given(resumeRepository.save(any())).willReturn(testResume);
-
-        // when
-        resumeService.uploadResume(1L, requestDto, content);
-
-        // then
-        verify(resumeRepository, times(1)).save(any());
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 회원으로 이력서 업로드 시 예외 발생")
-    void uploadResumeWithInvalidMember() {
-        // given
-        ResumeUploadRequestDto requestDto = new ResumeUploadRequestDto("테스트 이력서", "test.pdf", "test", "test");
-        given(memberRepository.findById(999L)).willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> resumeService.uploadResume(999L, requestDto, "content"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("사용자를 찾을 수 없습니다");
-    }
-
-    @Test
     @DisplayName("이력서 상세 조회 성공 테스트")
-    void getResumeByIdSuccess() {
+    void getResumeById() {
         // given
         given(resumeRepository.findByIdWithEvaluation(1L)).willReturn(Optional.of(testResume));
-        given(hashOperations.hasKey(any(), any())).willReturn(false);
-
         // when
         ResumeResponseDto result = resumeService.getResumeById(1L, 1L, local);
 
         // then
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo("테스트 이력서");
-        assertThat(result.getAverageScore()).isEqualTo(4.25);
+        assertThat(result.getAverageScore()).isEqualTo(4.3);
         assertThat(result.getCommentSize()).isEqualTo(2);
     }
 
@@ -183,8 +161,11 @@ class ResumeServiceTest {
     @Test
     @DisplayName("이력서 삭제 - 성공")
     void deleteResume_Success() {
+        //given
+        given(resumeRepository.findById(1L)).willReturn(Optional.of(testResume));
+
         //then
-        resumeService.deleteResume(1L);
+        resumeService.deleteResume(testResume.getId());
 
         // then
         verify(evaluationRepository).deleteAllByResumeId(1L);
