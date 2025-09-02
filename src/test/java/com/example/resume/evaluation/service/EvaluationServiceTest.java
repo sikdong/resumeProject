@@ -10,19 +10,21 @@ import com.example.resume.user.domain.Member;
 import com.example.resume.user.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-@DataJpaTest
+@ExtendWith(MockitoExtension.class)
 public class EvaluationServiceTest {
 
     @InjectMocks
@@ -131,8 +133,10 @@ public class EvaluationServiceTest {
     void shouldDeleteEvaluationSuccessfully() {
         Long evaluationId = 1L;
 
-        Mockito.doNothing().when(evaluationRepository).deleteById(evaluationId);
+        // 실행
+        evaluationService.deleteEvaluation(evaluationId);
 
-        assertDoesNotThrow(() -> evaluationService.deleteEvaluation(evaluationId));
+        // 검증
+        verify(evaluationRepository, times(1)).deleteById(evaluationId);
     }
 }
