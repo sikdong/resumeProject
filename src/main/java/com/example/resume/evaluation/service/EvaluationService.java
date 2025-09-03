@@ -35,10 +35,17 @@ public class EvaluationService {
                 .comment(evaluationRequestDto.getComment())
                 .evaluator(member)
                 .build();
+        sendMail(resume);
+        evaluationRepository.save(evaluation);
+    }
+
+    private void sendMail(Resume resume) {
+        if (!resume.getIsMailSent()){
+            return;
+        }
         String toEmail = resume.getMember().getEmail();
         String resumeTitle = resume.getTitle();
         emailService.sendReviewNotification(toEmail, resumeTitle);
-        evaluationRepository.save(evaluation);
     }
 
     @Transactional

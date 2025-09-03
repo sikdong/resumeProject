@@ -1,42 +1,34 @@
 package com.example.resume.service;
 
+import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.dto.ResumeResponseDto;
+import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.cv.service.ResumeService;
 import com.example.resume.cv.service.support.ResumeViewManager;
 import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.repository.EvaluationRepository;
-import com.example.resume.openAI.service.OpenAIService;
-import com.example.resume.cv.domain.Resume;
-import com.example.resume.cv.dto.ResumeResponseDto;
-import com.example.resume.cv.dto.ResumeUploadRequestDto;
-import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.user.domain.Member;
-import com.example.resume.user.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.io.IOException;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ResumeServiceTest {
@@ -45,16 +37,10 @@ class ResumeServiceTest {
     private ResumeService resumeService;
 
     @Mock
-    private MemberRepository memberRepository;
-
-    @Mock
     private ResumeRepository resumeRepository;
 
     @Mock
     private EvaluationRepository evaluationRepository;
-
-    @Mock
-    private OpenAIService openAIService;
 
     @Mock
     private RedisTemplate<String, Long> redisTemplate;

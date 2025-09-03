@@ -85,10 +85,11 @@ public class ResumeController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam("comment") String comment,
+            @RequestParam("isMailSent") Boolean isMailSent,
             Authentication authentication
     ) throws IOException {
         Long memberId = MemberUtil.getMemberId(authentication);
-        resumeService.uploadFile(memberId, file, title, comment);
+        resumeService.uploadFile(memberId, file, title, comment, isMailSent);
         return ResponseEntity.ok("파일 업로드 성공");
     }
 

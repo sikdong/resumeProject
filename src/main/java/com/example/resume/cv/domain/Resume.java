@@ -21,6 +21,7 @@ public class Resume {
     private Long id;
     private String title;
     private String fileUrl;
+    private Boolean isMailSent;
 
     @Column(columnDefinition = "varchar(255) default ''")
     private String comment;

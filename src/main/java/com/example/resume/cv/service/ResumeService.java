@@ -56,7 +56,7 @@ public class ResumeService {
     @CacheEvict(value = "resumeList", allEntries = true)
     @LogExecutionTime
     @Transactional
-    public void uploadFile(Long memberId, MultipartFile file, String title, String comment) throws IOException {
+    public void uploadFile(Long memberId, MultipartFile file, String title, String comment, Boolean isMailSent) throws IOException {
         Member member = findMemberById(memberId);
         String originalFileName = file.getOriginalFilename();
         byte[] fileBytes = file.getBytes();
@@ -66,6 +66,7 @@ public class ResumeService {
                 .title(title)
                 .comment(comment)
                 .fileUrl(fileUrl)
+                .isMailSent(isMailSent)
                 .build();
         resumeRepository.save(resume);
     }

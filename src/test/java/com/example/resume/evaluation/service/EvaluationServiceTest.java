@@ -55,7 +55,7 @@ public class EvaluationServiceTest {
 
         resume.setMember(member);
         resume.setTitle("Test Resume");
-        member.setEmail("test@example.com");
+        resume.setIsMailSent(false);
 
         Mockito.when(resumeRepository.findById(resumeId)).thenReturn(Optional.of(resume));
         Mockito.when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
