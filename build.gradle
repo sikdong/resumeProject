@@ -46,6 +46,9 @@ dependencies {
 	implementation "com.querydsl:querydsl-jpa:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	implementation "com.querydsl:querydsl-core"
 	implementation "com.querydsl:querydsl-collections"
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.36'
+	implementation group: 'org.apache.kafka', name: 'kafka-clients', version: '4.0.0'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	// querydsl JPAAnnotationProcessor 사용 지정
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api" // java.lang.NoClassDefFoundError (javax.annotation.Generated) 대응 코드

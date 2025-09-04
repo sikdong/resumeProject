@@ -1,6 +1,8 @@
 package com.example.resume.evaluation.service;
 
 import com.example.resume.common.annotation.LogExecutionTime;
+import com.example.resume.common.kafka.email.EmailNotificationProducer;
+import com.example.resume.cv.dto.EmailNotificationEvent;
 import com.example.resume.cv.service.EmailService;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.cv.domain.Resume;
@@ -11,6 +13,7 @@ import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,8 @@ public class EvaluationService {
     private final EvaluationRepository evaluationRepository;
     private final MemberRepository memberRepository;
     private final EmailService emailService;
+    private final EmailNotificationProducer emailNotificationProducer;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     @LogExecutionTime
@@ -35,17 +40,17 @@ public class EvaluationService {
                 .comment(evaluationRequestDto.getComment())
                 .evaluator(member)
                 .build();
-        sendMail(resume);
         evaluationRepository.save(evaluation);
+        sendMail(resume);
     }
 
     private void sendMail(Resume resume) {
-        if (!resume.getIsMailSent()){
-            return;
+        if (resume.getIsMailSent()){
+            String toEmail = resume.getMember().getEmail();
+            String resumeTitle = resume.getTitle();
+            //emailService.sendReviewNotification(toEmail, resumeTitle);
+            applicationEventPublisher.publishEvent(new EmailNotificationEvent(toEmail, resumeTitle));
         }
-        String toEmail = resume.getMember().getEmail();
-        String resumeTitle = resume.getTitle();
-        emailService.sendReviewNotification(toEmail, resumeTitle);
     }
 
     @Transactional
