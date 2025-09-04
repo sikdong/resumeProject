@@ -4,7 +4,7 @@ import com.example.resume.cv.domain.Resume;
 import com.example.resume.cv.dto.ResumeResponseDto;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.cv.service.ResumeService;
-import com.example.resume.cv.service.support.ResumeViewManager;
+import com.example.resume.cv.support.ResumeViewManager;
 import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.repository.EvaluationRepository;

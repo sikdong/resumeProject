@@ -1,4 +1,4 @@
-package com.example.resume.cv.service.support;
+package com.example.resume.cv.support;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
