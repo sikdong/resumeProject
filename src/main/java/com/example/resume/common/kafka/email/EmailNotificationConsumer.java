@@ -13,7 +13,7 @@ class EmailNotificationConsumer {
 
     private final JavaMailSender mailSender;
 
-    @KafkaListener(topics = "email-notification", groupId = "email-group")
+    @KafkaListener(topics = "email-notification", groupId = "debug-group")
     public void consume(EmailNotificationEvent event) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(event.getToEmail());
