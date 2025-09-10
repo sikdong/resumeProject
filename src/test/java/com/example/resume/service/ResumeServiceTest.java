@@ -9,6 +9,7 @@ import com.example.resume.enums.CareerLevel;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.user.domain.Member;
+import com.example.resume.user.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,13 +20,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -41,6 +46,12 @@ class ResumeServiceTest {
 
     @Mock
     private EvaluationRepository evaluationRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private MultipartFile multipartFile;
 
     @Mock
     private RedisTemplate<String, Long> redisTemplate;
@@ -156,5 +167,44 @@ class ResumeServiceTest {
         // then
         verify(evaluationRepository).deleteAllByResumeId(1L);
         verify(resumeRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("파일 업로드 성공 테스트")
+    void uploadFile_Success() throws Exception {
+        // given
+        String originalFileName = "resume.pdf";
+        String fileContent = "test content";
+        byte[] fileBytes = fileContent.getBytes();
+        String savedFilePath = "/path/to/saved/resume.pdf";
+
+        given(multipartFile.getOriginalFilename()).willReturn(originalFileName);
+        given(multipartFile.getBytes()).willReturn(fileBytes);
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
+        given(resumeRepository.save(any(Resume.class))).willReturn(testResume);
+
+        // when
+        resumeService.uploadFile(1L, multipartFile, "Test Resume", "Great job", false);
+
+        // then
+        verify(memberRepository).findById(1L);
+        verify(resumeRepository).save(any(Resume.class));
+    }
+
+
+    @Test
+    @DisplayName("파일 업로드 실패 테스트 - 파일 저장 오류")
+    void uploadFile_FileSaveFailure() throws Exception {
+        // given
+        String originalFileName = "resume.pdf";
+        given(multipartFile.getOriginalFilename()).willReturn(originalFileName);
+        given(multipartFile.getBytes()).willThrow(new IOException("파일 저장에 실패했습니다."));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
+
+        // when & then
+        Throwable exception = assertThrows(IOException.class,
+                () -> resumeService.uploadFile(1L, multipartFile, "Test Resume", "Unable to save", false));
+
+        assertThat(exception.getMessage()).isEqualTo("파일 저장에 실패했습니다.");
     }
 }
