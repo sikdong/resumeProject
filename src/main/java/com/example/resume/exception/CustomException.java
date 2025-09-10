@@ -1,4 +1,4 @@
-package com.resume.exception;
+package com.example.resume.exception;
 
 import lombok.Getter;
 
