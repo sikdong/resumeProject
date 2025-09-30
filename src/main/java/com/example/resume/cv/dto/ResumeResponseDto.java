@@ -32,6 +32,8 @@ public class ResumeResponseDto {
         private MemberDto member;
         private Long viewCount;
         private String comment;
+        private Boolean isViewed;
+        private Boolean isEvaluated;
 
         @Builder
         public ResumeResponseDto(

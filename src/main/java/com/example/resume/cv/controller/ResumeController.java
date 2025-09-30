@@ -12,7 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,18 +28,13 @@ import java.util.List;
 public class ResumeController {
     private final ResumeService resumeService;
 
-    @GetMapping
-    public ResponseEntity<List<ResumeResponseDto>> getAllResumes () {
-        List<ResumeResponseDto> resumeResponseDtos = resumeService.getAllResumes();
-        return ResponseEntity.ok(resumeResponseDtos);
-    }
-
     @GetMapping("/search")
-    public ResponseEntity<List<ResumeResponseDto>> searchResumesContainingTitle (@RequestParam String title) {
+    public ResponseEntity<List<ResumeResponseDto>> searchResumesContainingTitle (@RequestParam String title, Authentication authentication) {
+        Long memberId = MemberUtil.getMemberId(authentication);
         if (title.isBlank()) {
-            return ResponseEntity.ok(resumeService.getAllResumes());
+            return ResponseEntity.ok(resumeService.getAllResumes(memberId));
         }
-        return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title));
+        return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title, memberId));
     }
 
     @GetMapping("/{resumeId}")

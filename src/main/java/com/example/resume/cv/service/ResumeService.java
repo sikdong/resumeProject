@@ -2,9 +2,12 @@ package com.example.resume.cv.service;
 
 import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.cv.domain.Resume;
+import com.example.resume.cv.domain.ResumeInteraction;
 import com.example.resume.cv.dto.ResumeRecentlyViewedResponseDto;
 import com.example.resume.cv.dto.ResumeResponseDto;
+import com.example.resume.cv.repository.jpa.ResumeInteractionRepository;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
+import com.example.resume.cv.repository.queryDSL.ResumeInteractionQueryDSLRepository;
 import com.example.resume.cv.repository.queryDSL.ResumeQueryDSLRepository;
 import com.example.resume.cv.support.ResumeViewManager;
 import com.example.resume.evaluation.domain.Evaluation;
@@ -16,6 +19,7 @@ import com.example.resume.user.dto.MemberDto;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -30,10 +34,12 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -47,9 +53,38 @@ public class ResumeService {
     private final ResumeViewManager resumeViewManager;
     private final EvaluationRepository evaluationRepository;
     private final ResumeQueryDSLRepository resumeQueryDSLRepository;
+    private final ResumeInteractionRepository resumeInteractionRepository;
+    private final ResumeInteractionQueryDSLRepository resumeInteractionQueryDSLRepository;
 
     private static final String UPLOAD_DIR = "/home/ec2-user/uploads/";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+    @LogExecutionTime
+    public List<ResumeResponseDto> getAllResumesContainingTitle(String title, Long memberId) {
+        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluationContainingTitle(title);
+
+        List<ResumeInteraction> resumeInteractions = resumeInteractionQueryDSLRepository.getResumeInteractions(memberId);
+        Map<Long, Boolean> resumeInteractionMap = new HashMap<>();
+        for (ResumeInteraction resumeInteraction : resumeInteractions) {
+            Boolean isEvaluated = resumeInteraction.getIsEvaluated();
+            Long id = resumeInteraction.getResume().getId();
+            resumeInteractionMap.put(id, isEvaluated);
+        }
+        Set<Long> keys = resumeInteractionMap.keySet();
+
+        List<ResumeResponseDto> resumeResponseDtos = getResumeResponseDtos(resumesWithEvaluation);
+
+        for (ResumeResponseDto resumeResponseDto : resumeResponseDtos) {
+            Long resumeId = resumeResponseDto.getId();
+            if (keys.contains(resumeId)){
+                resumeResponseDto.setIsViewed(true);
+                resumeResponseDto.setIsEvaluated(resumeInteractionMap.get(resumeId));
+            }
+        }
+        return resumeResponseDtos;
+    }
+
+
 
     @CacheEvict(value = "resumeList", allEntries = true)
     @LogExecutionTime
@@ -69,56 +104,37 @@ public class ResumeService {
         resumeRepository.save(resume);
     }
 
-    private Member findMemberById(Long userId) {
-        return memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId: " + userId));
-    }
-
-    private String saveFile(String originalFileName, byte[] decodedBytes) {
-        try {
-            String datePath = LocalDate.now().format(DATE_FORMATTER);
-            String fileName = generateUniqueFileName(originalFileName);
-            Path filePath = Paths.get(UPLOAD_DIR, datePath, fileName);
-
-            createDirectoriesIfNotExists(filePath);
-            Files.write(filePath, decodedBytes);
-
-            return filePath.toString();
-        } catch (IOException e) {
-            log.error("파일 저장 중 오류가 발생했습니다.", e);
-            throw new RuntimeException("파일 저장에 실패했습니다.", e);
-        }
-    }
-
-    private String generateUniqueFileName(String originalFileName) {
-        return UUID.randomUUID() + "_" + originalFileName;
-    }
-
-    private void createDirectoriesIfNotExists(Path filePath) throws IOException {
-        Path parentDir = filePath.getParent();
-        if (parentDir != null) {
-            Files.createDirectories(parentDir);
-        }
-    }
-
     @Transactional(readOnly = true)
     @CacheEvict(value = "resumeList", allEntries = true)
     public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
+        Member member = findMemberById(memberId);
         Resume resume = findByIdWithEvaluation(resumeId);
+        Long resumeOwnerId = resume.getMember().getId();
+
+        ResumeInteraction resumeInteraction = resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, memberId);
+        if (resumeInteraction != null && !resumeOwnerId.equals(memberId)) {
+            ResumeInteraction savedResumeInteraction = ResumeInteraction.builder()
+                    .member(member)
+                    .resume(resume)
+                    .build();
+            resumeInteractionRepository.save(savedResumeInteraction);
+        }
+
         resumeViewManager.processViewCount(resumeId, memberId, clientIp);
         resumeViewManager.markViewed(memberId, resumeId, Instant.now());
         return buildResumeResponseDto(resume);
     }
 
-    private Resume findByIdWithEvaluation(Long resumeId) {
-        return resumeRepository.findByIdWithEvaluation(resumeId)
-                .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다. resumeId: " + resumeId));
-    }
-
     @Cacheable(value = "resumeList")
     @Transactional(readOnly = true)
-    public List<ResumeResponseDto> getAllResumes() {
+    public List<ResumeResponseDto> getAllResumes(Long memberId) {
         List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
+        if (memberId != 0L){
+            List<Long> resumeIds = resumesWithEvaluation.stream()
+                    .map(Resume::getId)
+                    .toList();
+            List<ResumeInteraction> resumeInteractions = resumeInteractionQueryDSLRepository.getResumeInteractions(memberId);
+        }
         return getResumeResponseDtos(resumesWithEvaluation);
     }
 
@@ -144,11 +160,6 @@ public class ResumeService {
         evaluationRepository.deleteAllByResumeId(resumeId);;
         resumeRepository.deleteById(resumeId);
     }
-    @LogExecutionTime
-    public List<ResumeResponseDto> getAllResumesContainingTitle(String title) {
-        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluationContainingTitle(title);
-        return getResumeResponseDtos(resumesWithEvaluation);
-    }
 
     public List<ResumeRecentlyViewedResponseDto> getRecentlyViewedResumes(Long memberId) {
         List<Long> recentIds = resumeViewManager.getRecentIds(memberId, 5);
@@ -162,6 +173,52 @@ public class ResumeService {
     }
 
     /*******private method*******/
+    @NotNull
+    private List<Long> getResumeIdsBy(List<ResumeInteraction> resumeInteractions) {
+        return resumeInteractions.stream()
+                .map(ResumeInteraction::getResume)
+                .map(Resume::getId)
+                .toList();
+    }
+
+    private Resume findByIdWithEvaluation(Long resumeId) {
+        return resumeRepository.findByIdWithEvaluation(resumeId)
+                .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다. resumeId: " + resumeId));
+    }
+
+    private Member findMemberById(Long userId) {
+        return memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId: " + userId));
+    }
+
+    private String saveFile(String originalFileName, byte[] decodedBytes) {
+        try {
+            String datePath = LocalDate.now().format(DATE_FORMATTER);
+            String fileName = generateUniqueFileName(originalFileName);
+            Path filePath = Paths.get(UPLOAD_DIR, datePath, fileName);
+
+            createDirectoriesIfNotExists(filePath);
+            Files.write(filePath, decodedBytes);
+
+            return filePath.toString();
+        } catch (IOException e) {
+            log.error("파일 저장 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("파일 저장에 실패했습니다.", e);
+        }
+    }
+
+
+    private String generateUniqueFileName(String originalFileName) {
+        return UUID.randomUUID() + "_" + originalFileName;
+    }
+
+    private void createDirectoriesIfNotExists(Path filePath) throws IOException {
+        Path parentDir = filePath.getParent();
+        if (parentDir != null) {
+            Files.createDirectories(parentDir);
+        }
+    }
+
     private void deleteFile(Resume resume) {
         String path = resume.getFileUrl();
         File file = new File(path);

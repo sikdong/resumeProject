@@ -2,7 +2,10 @@ package com.example.resume.evaluation.service;
 
 import com.example.resume.common.annotation.LogExecutionTime;
 import com.example.resume.common.kafka.email.EmailNotificationProducer;
+import com.example.resume.cv.domain.ResumeInteraction;
 import com.example.resume.cv.dto.EmailNotificationEvent;
+import com.example.resume.cv.repository.jpa.ResumeInteractionRepository;
+import com.example.resume.cv.repository.queryDSL.ResumeInteractionQueryDSLRepository;
 import com.example.resume.cv.service.EmailService;
 import com.example.resume.evaluation.domain.Evaluation;
 import com.example.resume.cv.domain.Resume;
@@ -13,6 +16,7 @@ import com.example.resume.cv.repository.jpa.ResumeRepository;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EvaluationService {
     private final ResumeRepository resumeRepository;
     private final EvaluationRepository evaluationRepository;
@@ -28,12 +33,19 @@ public class EvaluationService {
     private final EmailService emailService;
     private final EmailNotificationProducer emailNotificationProducer;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ResumeInteractionQueryDSLRepository resumeInteractionQueryDSLRepository;
+    private final ResumeInteractionRepository resumeInteractionRepository;
 
     @Transactional
     @LogExecutionTime
     public void evaluate(Long resumeId, EvaluationDto evaluationRequestDto, Long memberId) {
-        Resume resume = resumeRepository.findById(resumeId).orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
         Member member = validateMember(memberId);
+
+        ResumeInteraction resumeInteraction = resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, memberId);
+        resumeInteraction.markEvaluated();
+
         Evaluation evaluation = Evaluation.builder()
                 .resume(resume)
                 .score(evaluationRequestDto.getScore())
@@ -42,15 +54,6 @@ public class EvaluationService {
                 .build();
         evaluationRepository.save(evaluation);
         sendMail(resume);
-    }
-
-    private void sendMail(Resume resume) {
-        if (resume.getIsMailSent()){
-            String toEmail = resume.getMember().getEmail();
-            String resumeTitle = resume.getTitle();
-            //emailService.sendReviewNotification(toEmail, resumeTitle);
-            applicationEventPublisher.publishEvent(new EmailNotificationEvent(toEmail, resumeTitle));
-        }
     }
 
     @Transactional
@@ -83,6 +86,16 @@ public class EvaluationService {
 
     /********private method*********/
     private Member validateMember(Long memberId) {
-        return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
+    }
+
+    private void sendMail(Resume resume) {
+        if (resume.getIsMailSent()){
+            String toEmail = resume.getMember().getEmail();
+            String resumeTitle = resume.getTitle();
+            //emailService.sendReviewNotification(toEmail, resumeTitle);
+            applicationEventPublisher.publishEvent(new EmailNotificationEvent(toEmail, resumeTitle));
+        }
     }
 }
