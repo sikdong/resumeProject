@@ -13,10 +13,12 @@ public class CorsGlobalConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
+                        .allowedOriginPatterns(
+                                "http://localhost:*",
                                 "https://app.appsmith.com",
                                 "http://56.155.81.137")
                         .allowedMethods("*")
+                        .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
