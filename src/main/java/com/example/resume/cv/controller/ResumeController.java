@@ -9,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,13 +30,14 @@ import java.util.List;
 public class ResumeController {
     private final ResumeService resumeService;
 
-    @GetMapping("/search")
-    public ResponseEntity<List<ResumeResponseDto>> searchResumesContainingTitle (@RequestParam String title, Authentication authentication) {
+    @GetMapping
+    public ResponseEntity<List<ResumeResponseDto>> listResumes(@RequestParam(required = false) String title,
+                                                               Authentication authentication) {
         Long memberId = MemberUtil.getMemberId(authentication);
-        if (title.isBlank()) {
-            return ResponseEntity.ok(resumeService.getAllResumes(memberId));
+        if (StringUtils.hasText(title)) {
+            return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title.trim(), memberId));
         }
-        return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title, memberId));
+        return ResponseEntity.ok(resumeService.getAllResumes(memberId));
     }
 
     @GetMapping("/{resumeId}")
@@ -47,14 +50,14 @@ public class ResumeController {
         return ResponseEntity.ok(resumeResponseDto);
     }
 
-    @GetMapping("/my-resumes")
+    @GetMapping("/me")
     public ResponseEntity<List<ResumeResponseDto>> getMyResumes (Authentication authentication) {
         Long memberId = MemberUtil.getMemberId(authentication);
         List<ResumeResponseDto> resumeResponseDtos = resumeService.getMyResumes(memberId);
         return ResponseEntity.ok(resumeResponseDtos);
     }
 
-    @GetMapping("file/{resumeId}")
+    @GetMapping("/{resumeId}/file")
     public ResponseEntity<Resource> getFile(@PathVariable Long resumeId) throws MalformedURLException {
         Path filePath = resumeService.getFilePath(resumeId);
         String fileName = filePath.getFileName().toString();
@@ -74,17 +77,17 @@ public class ResumeController {
         }
     }
 
-    @PostMapping("/upload")
+    @PostMapping
     public ResponseEntity<String> uploadResume(
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
-            @RequestParam("comment") String comment,
+            @RequestParam(value = "comment", required = false) String comment,
             @RequestParam("isMailSent") Boolean isMailSent,
             Authentication authentication
     ) throws IOException {
         Long memberId = MemberUtil.getMemberId(authentication);
         resumeService.uploadFile(memberId, file, title, comment, isMailSent);
-        return ResponseEntity.ok("파일 업로드 성공");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 
@@ -94,7 +97,7 @@ public class ResumeController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/recently-viewed")
+    @GetMapping("/me/recently-viewed")
     public ResponseEntity<List<ResumeRecentlyViewedResponseDto>> getRecentlyViewedResumes(Authentication authentication){
         Long memberId = MemberUtil.getMemberId(authentication);
         List<ResumeRecentlyViewedResponseDto> recentlyViewedResumes = resumeService.getRecentlyViewedResumes(memberId);
