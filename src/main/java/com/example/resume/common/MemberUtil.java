@@ -1,6 +1,8 @@
 package com.example.resume.common;
 
 
+import com.example.resume.common.auth.CustomUserDetails;
+import com.example.resume.user.domain.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 
@@ -18,8 +20,28 @@ public class MemberUtil {
         if (authentication == null) {
             return 0L;
         }
-        String id = (String) authentication.getPrincipal();
-        return Long.valueOf(id);
+
+        Object principalObject = authentication.getPrincipal();
+
+        if (principalObject instanceof CustomUserDetails customUserDetails) {
+            Member member = customUserDetails.member();
+            return member != null ? member.getId() : 0L;
+        }
+
+        if (principalObject instanceof Member member) {
+            return member.getId();
+        }
+
+        String principal = String.valueOf(principalObject);
+        if (principal.isBlank() || "anonymousUser".equalsIgnoreCase(principal)) {
+            return 0L;
+        }
+
+        try {
+            return Long.parseLong(principal);
+        } catch (NumberFormatException ignored) {
+            return 0L;
+        }
     }
 
     public static String getClientIp(HttpServletRequest request) {
