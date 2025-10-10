@@ -11,7 +11,12 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { setToken } = useAuthToken();
+  const { setToken, token } = useAuthToken();
+  const handleLogout = () => {
+    setToken(null);
+    localStorage.removeItem('refreshToken'); // 로컬 스토리지도 제거
+    navigate('/');
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -53,26 +58,35 @@ const AppLayout = () => {
           <div className="flex items-center gap-3 text-brand">
             <RocketLaunchIcon className="h-10 w-10" />
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">Wishy Resume Studio</h1>
+              <h1 className="text-2xl font-semibold text-slate-900">Wishy</h1>
               <p className="text-sm text-slate-500">이력서 평가와 관리를 한 번에</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <nav className="flex items-center gap-3">
-              <NavLink to="/" className={navLinkClass} end>
-                전체 이력서
-              </NavLink>
-              <NavLink to="/my-resumes" className={navLinkClass}>
-                내 이력서
-              </NavLink>
+              {token && (
+                  <NavLink to="/my-resumes" className={navLinkClass}>
+                    내 이력서
+                  </NavLink>
+              )}
             </nav>
-            <button
-              type="button"
-              onClick={handleOpenLogin}
-              className="inline-flex items-center gap-2 rounded-xl border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand transition hover:bg-brand/10"
-            >
-              로그인
-            </button>
+            {!token ? (
+                <button
+                    type="button"
+                    onClick={handleOpenLogin}
+                    className="inline-flex items-center gap-2 rounded-xl border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand transition hover:bg-brand/10"
+                >
+                  로그인
+                </button>
+            ) : (
+                <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-2 rounded-xl border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-100"
+                >
+                  로그아웃
+                </button>
+            )}
           </div>
         </div>
       </header>
@@ -84,7 +98,6 @@ const AppLayout = () => {
       <footer className="border-t border-slate-200 bg-white py-6">
         <div className="mx-auto flex max-w-[1300px] flex-col items-center justify-between gap-3 px-6 text-sm text-slate-400 sm:flex-row">
           <p>© {new Date().getFullYear()} Wishy. All rights reserved.</p>
-          <p>백엔드 API 연동 · Tailwind CSS UI</p>
         </div>
       </footer>
     </div>

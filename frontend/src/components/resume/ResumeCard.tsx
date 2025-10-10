@@ -37,6 +37,17 @@ const ResumeCard = ({ resume, onSelect, isActive }: ResumeCardProps) => (
           {resume.commentSize ?? 0}
         </span>
       </div>
+      <div className="inline-flex items-center gap-1">
+        {resume.createAt ?? 0}
+      </div>
+      <div className="flex items-center gap-6 text-xs font-medium text-slate-500">
+        <span className="inline-flex items-center gap-1">
+          {resume.isViewed && "봤어요"}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          {resume.isEvaluated && "평가 했어요"}
+        </span>
+      </div>
     </div>
   </button>
 );

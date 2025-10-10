@@ -125,9 +125,8 @@ const UploadResumeDialog = ({ open, onClose, onSuccess }: UploadResumeDialogProp
                         type="file"
                         accept="application/pdf"
                         onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                        className="mt-1 block w-full cursor-pointer rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-brand file:px-3 file:py-2 file:font-semibold file:text-white hover:border-brand"
+                        className="file:cursor-pointer mt-1 block w-full cursor-pointer rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-brand file:px-3 file:py-2 file:font-semibold file:text-white hover:border-brand"
                       />
-                      <p className="mt-1 text-xs text-slate-400">업로드 후 링크를 통해 바로 열람할 수 있습니다.</p>
                     </div>
                     <label className="mt-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 shadow-inner">
                       <input
