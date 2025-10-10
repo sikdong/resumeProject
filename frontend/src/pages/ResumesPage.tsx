@@ -59,17 +59,6 @@ const ResumesPage = () => {
 
     loadRecent();
 
-    if (typeof window !== 'undefined') {
-      const handleFocus = () => {
-        loadRecent();
-      };
-      window.addEventListener('focus', handleFocus);
-      return () => {
-        isMounted = false;
-        window.removeEventListener('focus', handleFocus);
-      };
-    }
-
     return () => {
       isMounted = false;
     };
@@ -80,14 +69,41 @@ const ResumesPage = () => {
     setSearchQuery(searchTerm.trim());
   };
 
-  const openResumeDetail = (resumeId: number) => {
-    if (typeof window === 'undefined') return;
-    window.open(`/resumes/${resumeId}`, '_blank', 'noopener,noreferrer');
+  const refreshRecentlyViewed = async () => {
+    try {
+      const items = await fetchRecentlyViewed();
+      setRecentlyViewed(items);
+    } catch (error) {
+      console.warn('최근 본 이력서를 업데이트하지 못했습니다.', error);
+    }
   };
 
-  const handleUploadSuccess = () => {
-    setSearchQuery('');
+  const openResumeDetail = async (resumeId: number) => {
+    if (typeof window === 'undefined') return;
+    window.open(`/resumes/${resumeId}`, '_blank', 'noopener,noreferrer');
+    await refreshRecentlyViewed();
+  };
+
+  const handleUploadSuccess = async () => {
+    const hadSearch = searchQuery.trim().length > 0;
     setSearchTerm('');
+
+    if (hadSearch) {
+      setSearchQuery('');
+      return;
+    }
+
+    setListState('loading');
+    try {
+      const items = await fetchResumes('');
+      setResumes(items);
+      setErrorMessage(null);
+      setListState('idle');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '이력서를 불러오지 못했습니다.';
+      setErrorMessage(message);
+      setListState('error');
+    }
   };
 
   const gridColumns = 'lg:grid-cols-[minmax(0,_4.5fr)_minmax(0,_1.25fr)]';
