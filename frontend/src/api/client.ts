@@ -1,4 +1,7 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:8080';
+const DEFAULT_API_BASE_URL =
+  process.env.NODE_ENV === 'production' ? 'http://56.155.81.137' : 'http://localhost:8080';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 
 type RequestOptions = RequestInit & { parseJson?: boolean };
 
