@@ -58,7 +58,7 @@ const AppLayout = () => {
           <div className="flex items-center gap-3 text-brand">
             <RocketLaunchIcon className="h-10 w-10" />
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">Wishy</h1>
+              <h1 className="text-2xl font-semibold text-slate-900">Evalume</h1>
               <p className="text-sm text-slate-500">이력서 평가와 관리를 한 번에</p>
             </div>
           </div>
@@ -97,7 +97,7 @@ const AppLayout = () => {
 
       <footer className="border-t border-slate-200 bg-white py-6">
         <div className="mx-auto flex max-w-[1300px] flex-col items-center justify-between gap-3 px-6 text-sm text-slate-400 sm:flex-row">
-          <p>© {new Date().getFullYear()} Wishy. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Evalume. All rights reserved.</p>
         </div>
       </footer>
     </div>

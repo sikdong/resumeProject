@@ -52,7 +52,7 @@ const LoginPage = () => {
       <div className="flex h-[500px] w-[300px] flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 text-slate-700 shadow-soft">
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-semibold text-slate-900">로그인</h1>
-          <p className="text-sm text-slate-500">Wishy에 접속하세요.</p>
+          <p className="text-sm text-slate-500">Evalume에 접속하세요.</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col justify-center gap-4">
           <label className="text-left text-sm font-medium text-slate-600">
