@@ -20,7 +20,8 @@ public class CorsGlobalConfig {
                 registry.addMapping("/**")
                         .allowedOriginPatterns(
                                 "http://localhost:*",
-                                "https://app.appsmith.com",
+                                "https://www.evalume.store",
+                                "https://evalume.store",
                                 "http://56.155.81.137")
                         .allowedMethods("*")
                         .allowedHeaders("*")
@@ -35,7 +36,8 @@ public class CorsGlobalConfig {
         configuration.setAllowCredentials(true);
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
-                "https://app.appsmith.com",
+                "https://www.evalume.store",
+                "https://evalume.store",
                 "http://56.155.81.137"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
