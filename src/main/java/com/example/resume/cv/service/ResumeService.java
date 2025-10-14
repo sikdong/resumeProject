@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +33,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -107,35 +105,28 @@ public class ResumeService {
     @Transactional(readOnly = true)
     @CacheEvict(value = "resumeList", allEntries = true)
     public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
-        Member member = findMemberById(memberId);
         Resume resume = findByIdWithEvaluation(resumeId);
-        Long resumeOwnerId = resume.getMember().getId();
+        Long resolvedMemberId = memberId != null ? memberId : 0L;
 
-        ResumeInteraction resumeInteraction = resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, memberId);
-        if (resumeInteraction != null && !resumeOwnerId.equals(memberId)) {
-            ResumeInteraction savedResumeInteraction = ResumeInteraction.builder()
-                    .member(member)
-                    .resume(resume)
-                    .build();
-            resumeInteractionRepository.save(savedResumeInteraction);
+        if (resolvedMemberId > 0) {
+            Member member = findMemberById(resolvedMemberId);
+            Long resumeOwnerId = resume.getMember().getId();
+
+            ResumeInteraction resumeInteraction =
+                    resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, resolvedMemberId);
+            if (resumeInteraction == null && !resumeOwnerId.equals(resolvedMemberId)) {
+                ResumeInteraction savedResumeInteraction = ResumeInteraction.builder()
+                        .member(member)
+                        .resume(resume)
+                        .build();
+                resumeInteractionRepository.save(savedResumeInteraction);
+            }
+
+            resumeViewManager.markViewed(resolvedMemberId, resumeId, Instant.now());
         }
 
-        resumeViewManager.processViewCount(resumeId, memberId, clientIp);
-        resumeViewManager.markViewed(memberId, resumeId, Instant.now());
+        resumeViewManager.processViewCount(resumeId, resolvedMemberId, clientIp);
         return buildResumeResponseDto(resume);
-    }
-
-    @Cacheable(value = "resumeList")
-    @Transactional(readOnly = true)
-    public List<ResumeResponseDto> getAllResumes(Long memberId) {
-        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluation();
-        if (memberId != 0L){
-            List<Long> resumeIds = resumesWithEvaluation.stream()
-                    .map(Resume::getId)
-                    .toList();
-            List<ResumeInteraction> resumeInteractions = resumeInteractionQueryDSLRepository.getResumeInteractions(memberId);
-        }
-        return getResumeResponseDtos(resumesWithEvaluation);
     }
 
     @Transactional(readOnly = true)
