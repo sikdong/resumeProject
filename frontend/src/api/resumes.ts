@@ -9,7 +9,7 @@ import type {
 const ensureArray = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
 
 export const fetchResumes = async (keyword = '') => {
-  const query = keyword.trim().length ? `?title=${encodeURIComponent(keyword.trim())}` : '';
+  const query = keyword.trim().length ? `?searchValue=${encodeURIComponent(keyword.trim())}` : '';
   const data = await api.get<ResumeSummary[] | unknown>(`/api/resumes${query}`);
   return ensureArray<ResumeSummary>(data);
 };
