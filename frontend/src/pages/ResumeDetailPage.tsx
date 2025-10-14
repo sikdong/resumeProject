@@ -7,6 +7,7 @@ import { fetchResumeDetail, downloadResumeUrl } from '../api/resumes';
 import { createEvaluation, deleteEvaluation } from '../api/evaluations';
 import type { ResumeResponse } from '../types/resume';
 import { useAuthToken } from '../context/AuthTokenContext';
+import { useToast } from '../context/ToastContext';
 
 type LoadingState = 'idle' | 'loading' | 'error';
 
@@ -17,6 +18,7 @@ type RouteParams = {
 const ResumeDetailPage = () => {
   const { resumeId } = useParams<RouteParams>();
   const { isAuthenticated } = useAuthToken();
+  const { showToast } = useToast();
   const [resume, setResume] = useState<ResumeResponse | undefined>();
   const [state, setState] = useState<LoadingState>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,6 +86,7 @@ const ResumeDetailPage = () => {
       await refreshDetail();
     } catch (error) {
       const message = error instanceof Error ? error.message : '평가 등록에 실패했습니다.';
+      showToast(message, { variant: 'error' });
       setErrorMessage(message);
     } finally {
       setMutating(false);
