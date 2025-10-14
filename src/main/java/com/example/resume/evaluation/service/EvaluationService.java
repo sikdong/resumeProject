@@ -13,6 +13,7 @@ import com.example.resume.evaluation.dto.EvaluationDto;
 import com.example.resume.evaluation.dto.EvaluationUpdateResponseDto;
 import com.example.resume.evaluation.repository.EvaluationRepository;
 import com.example.resume.cv.repository.jpa.ResumeRepository;
+import com.example.resume.exception.CustomException;
 import com.example.resume.user.domain.Member;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.example.resume.exception.ErrorCode.CURRENT_USER_EQUALS_RESUME_OWNER;
+import static com.example.resume.exception.ErrorCode.RESUME_NOT_FOUND;
+import static com.example.resume.exception.ErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +45,12 @@ public class EvaluationService {
     @LogExecutionTime
     public void evaluate(Long resumeId, EvaluationDto evaluationRequestDto, Long memberId) {
         Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() -> new RuntimeException("이력서가 존재하지 않습니다"));
+                .orElseThrow(() -> new CustomException(RESUME_NOT_FOUND));
         Member member = validateMember(memberId);
 
+        if(resume.getMember().getId().equals(memberId)){
+            throw new CustomException(CURRENT_USER_EQUALS_RESUME_OWNER);
+        }
         ResumeInteraction resumeInteraction = resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, memberId);
         resumeInteraction.markEvaluated();
 
@@ -87,7 +95,7 @@ public class EvaluationService {
     /********private method*********/
     private Member validateMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다"));
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     private void sendMail(Resume resume) {

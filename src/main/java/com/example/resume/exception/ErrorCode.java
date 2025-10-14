@@ -18,7 +18,10 @@ public enum ErrorCode {
     
     // Resume
     RESUME_NOT_FOUND(HttpStatus.NOT_FOUND, "이력서를 찾을 수 없습니다."),
-    UNAUTHORIZED_RESUME_ACCESS(HttpStatus.FORBIDDEN, "해당 이력서에 대한 접근 권한이 없습니다.");
+    UNAUTHORIZED_RESUME_ACCESS(HttpStatus.FORBIDDEN, "해당 이력서에 대한 접근 권한이 없습니다."),
+
+    //Evaluation
+    CURRENT_USER_EQUALS_RESUME_OWNER(HttpStatus.BAD_REQUEST, "해당 이력서 사용자는 평가를 남길 수 없습니다");
 
     private final HttpStatus status;
     private final String message;
