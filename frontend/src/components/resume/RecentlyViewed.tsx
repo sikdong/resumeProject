@@ -9,12 +9,12 @@ const RecentlyViewed = ({ items, onSelect }: RecentlyViewedProps) => {
   const list = Array.isArray(items) ? items : [];
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="flex max-h-[240px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="text-sm font-semibold text-slate-700">최근 본 이력서</h3>
       {list.length === 0 ? (
         <p className="mt-3 text-sm text-slate-500">최근 본 이력서가 없습니다.</p>
       ) : (
-        <ul className="mt-3 flex flex-1 flex-col gap-2 overflow-y-auto text-sm text-slate-600">
+        <ul className="mt-3 flex flex-1 flex-col gap-2 overflow-y-auto text-sm text-slate-600 max-h-[220px]">
           {list.map((item) => (
             <li key={item.resumeId}>
               <button
