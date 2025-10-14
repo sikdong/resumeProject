@@ -48,7 +48,20 @@ export const apiFetch = async <T>(path: string, options: RequestOptions = {}): P
 
   if (!response.ok) {
     const payload = await readBody(response);
-    const message = typeof payload === 'string' && payload.length > 0 ? payload : response.statusText;
+    let message = response.statusText;
+
+    if (typeof payload === 'string') {
+      const trimmed = payload.trim();
+      if (trimmed.length > 0) {
+        message = trimmed;
+      }
+    } else if (payload && typeof payload === 'object') {
+      const extracted = (payload as Record<string, unknown>).message;
+      if (typeof extracted === 'string' && extracted.trim().length > 0) {
+        message = extracted.trim();
+      }
+    }
+
     const error: ApiError = new Error(message);
     error.status = response.status;
     throw error;

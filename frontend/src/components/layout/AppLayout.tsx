@@ -48,7 +48,7 @@ const AppLayout = () => {
     if (typeof window === 'undefined') {
       return;
     }
-    window.open('/login', '_blank', 'noopener,noreferrer');
+    window.location.href = '/login';
   };
 
   return (
@@ -56,7 +56,14 @@ const AppLayout = () => {
       <header className="bg-white/90 backdrop-blur border-b border-slate-200">
         <div className="mx-auto flex max-w-[1300px] flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3 text-brand">
-            <RocketLaunchIcon className="h-10 w-10" />
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="rounded-full p-1 transition hover:bg-brand/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+              aria-label="홈으로 이동"
+            >
+              <RocketLaunchIcon className="h-10 w-10" />
+            </button>
             <div>
               <h1 className="text-2xl font-semibold text-slate-900">Evalume</h1>
               <p className="text-sm text-slate-500">이력서 평가와 관리를 한 번에</p>
