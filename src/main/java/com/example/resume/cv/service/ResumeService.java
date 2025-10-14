@@ -60,8 +60,8 @@ public class ResumeService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     @LogExecutionTime
-    public List<ResumeResponseDto> getAllResumesContainingTitle(String title, Long memberId) {
-        List<Resume> resumesWithEvaluation = resumeRepository.findAllWithEvaluationContainingTitle(title);
+    public List<ResumeResponseDto> getResumesBy(String searchValue, Long memberId) {
+        List<Resume> resumesWithEvaluation = resumeQueryDSLRepository.findAllWithEvaluationBy(searchValue);
 
         List<ResumeInteraction> resumeInteractions = resumeInteractionQueryDSLRepository.getResumeInteractions(memberId);
         Map<Long, Boolean> resumeInteractionMap = new HashMap<>();

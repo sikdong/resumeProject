@@ -31,11 +31,4 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
             "WHERE r.id in :ids " +
             "ORDER BY r.createdAt desc")
     List<Resume> findAllWithEvaluationByIdIn(@Param("ids") List<Long> ids);
-
-    @Query("SELECT r FROM Resume r " +
-            "LEFT JOIN FETCH r.evaluations " +
-            "LEFT JOIN FETCH r.member " +
-            "WHERE r.title LIKE  %:title% " +
-            "ORDER BY r.createdAt desc")
-    List<Resume> findAllWithEvaluationContainingTitle(@Param("title") String title);
 }

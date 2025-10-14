@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,13 +30,10 @@ public class ResumeController {
     private final ResumeService resumeService;
 
     @GetMapping
-    public ResponseEntity<List<ResumeResponseDto>> listResumes(@RequestParam(required = false) String title,
+    public ResponseEntity<List<ResumeResponseDto>> listResumes(@RequestParam(required = false) String searchValue,
                                                                Authentication authentication) {
         Long memberId = MemberUtil.getMemberId(authentication);
-        if (StringUtils.hasText(title)) {
-            return ResponseEntity.ok(resumeService.getAllResumesContainingTitle(title.trim(), memberId));
-        }
-        return ResponseEntity.ok(resumeService.getAllResumes(memberId));
+        return ResponseEntity.ok(resumeService.getResumesBy(searchValue, memberId));
     }
 
     @GetMapping("/{resumeId}")
