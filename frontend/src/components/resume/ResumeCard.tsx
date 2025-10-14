@@ -42,10 +42,14 @@ const ResumeCard = ({ resume, onSelect, isActive }: ResumeCardProps) => (
       </div>
       <div className="flex items-center gap-6 text-xs font-medium text-slate-500">
         <span className="inline-flex items-center gap-1">
-          {resume.isViewed && "봤어요"}
+          <b>
+            {resume.isViewed && "봤어요"}
+          </b>
         </span>
         <span className="inline-flex items-center gap-1">
-          {resume.isEvaluated && "평가 했어요"}
+          <b>
+            {resume.isEvaluated && "평가 했어요"}
+          </b>
         </span>
       </div>
     </div>
