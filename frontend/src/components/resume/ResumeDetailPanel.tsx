@@ -152,7 +152,7 @@ const ResumeDetailPanel = ({
       <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
         <h4 className="text-sm font-semibold text-slate-700">평가 남기기</h4>
         <p className="mt-1 text-xs text-slate-500">
-          점수는 1.0 ~ 5.0 범위에서 소수 첫째 자리까지 입력할 수 있습니다.
+          점수는 1.0 ~ 5.0 범위에서 0.5 단위로 입력할 수 있습니다.
         </p>
 
         <div className="mt-3 grid gap-3 sm:grid-cols-[120px_1fr]">
@@ -165,9 +165,18 @@ const ResumeDetailPanel = ({
               type="number"
               min={1}
               max={5}
-              step={0.1}
+              step={0.5}
               value={score}
-              onChange={(event) => setScore(Number(event.target.value) || 0)}
+              onChange={(event) => {
+                const raw = Number(event.target.value);
+                if (Number.isNaN(raw)) {
+                  setScore(0);
+                  return;
+                }
+                const clamped = Math.min(5, Math.max(1, raw));
+                const normalized = Math.round(clamped * 2) / 2;
+                setScore(normalized);
+              }}
               className="mt-1 w-full rounded-lg border-slate-200 bg-white px-3 py-2 text-sm"
               disabled={!isAuthenticated}
             />
