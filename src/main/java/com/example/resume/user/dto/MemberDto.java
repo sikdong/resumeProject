@@ -10,11 +10,13 @@ public record MemberDto(
         String jobTitle
 ) {
     public static MemberDto fromEntity(Member member){
+        String careerLevel = member.getCareerLevel() != null ? member.getCareerLevel().getLabel() : null;
+
         return new MemberDto(
                 member.getId(),
                 member.getEmail(),
                 member.getName(),
-                member.getCareerLevel().getLabel(),
+                careerLevel,
                 member.getJobTitle()
         );
     }

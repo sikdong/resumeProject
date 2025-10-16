@@ -102,7 +102,7 @@ public class ResumeService {
         resumeRepository.save(resume);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @CacheEvict(value = "resumeList", allEntries = true)
     public ResumeResponseDto getResumeById(Long resumeId, Long memberId, String clientIp) {
         Resume resume = findByIdWithEvaluation(resumeId);

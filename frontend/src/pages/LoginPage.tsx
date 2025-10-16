@@ -1,12 +1,16 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthToken } from '../context/AuthTokenContext';
+import { login } from '../api/auth';
 
 const LoginPage = () => {
   const [loginId, setLoginId] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [searchParams] = useSearchParams();
-  const { setToken } = useAuthToken();
+  const navigate = useNavigate();
+  const { setToken, setSessionName } = useAuthToken();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const accessToken = searchParams.get('token');
@@ -38,13 +42,37 @@ const LoginPage = () => {
     }
   }, [searchParams, setToken]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
+
+    if (!loginId || !loginPassword) {
+      setError('이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const member = await login({ email: loginId, password: loginPassword });
+      setToken(null);
+      setSessionName(member.name ?? member.email);
+      setLoginId('');
+      setLoginPassword('');
+      navigate('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '로그인에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleLogin = () => {
     const apiBaseUrl = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:8080';
     window.location.href = `${apiBaseUrl}/oauth2/authorization/google`;
+  };
+
+  const handleOpenRegister = () => {
+    navigate('/register');
   };
 
   return (
@@ -55,6 +83,7 @@ const LoginPage = () => {
           <p className="text-sm text-slate-500">Evalume에 접속하세요.</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col justify-center gap-4">
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <label className="text-left text-sm font-medium text-slate-600">
             아이디
             <input
@@ -78,12 +107,14 @@ const LoginPage = () => {
           <div className="space-y-2">
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
+              disabled={isSubmitting}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
             >
-              로그인
+              {isSubmitting ? '로그인 중...' : '로그인'}
             </button>
             <button
               type="button"
+              onClick={handleOpenRegister}
               className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
             >
               회원가입하기

@@ -2,6 +2,7 @@ package com.example.resume.config;
 
 import com.example.resume.common.jwt.JwtAuthenticationFilter;
 import com.example.resume.common.jwt.JwtUtil;
+import com.example.resume.common.session.SessionAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -20,7 +23,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http,
-                                              JwtAuthenticationFilter jwtFilter) throws Exception {
+                                              JwtAuthenticationFilter jwtFilter,
+                                              SessionAuthenticationFilter sessionFilter) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .securityMatcher("/api/**")
@@ -29,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resumes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/token/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .anonymous(anonymous -> anonymous
@@ -39,6 +44,7 @@ public class SecurityConfig {
                         .frameOptions(frameOptions -> frameOptions.disable())
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sessionFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
                     res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     res.getWriter().write("Unauthorized");
@@ -66,6 +72,16 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
+    }
+
+    @Bean
+    public SessionAuthenticationFilter sessionAuthenticationFilter() {
+        return new SessionAuthenticationFilter();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
 

@@ -2,6 +2,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 import { useEffect } from 'react';
 import { useAuthToken } from '../../context/AuthTokenContext';
+import { logout } from '../../api/auth';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
@@ -11,10 +12,16 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { setToken, token } = useAuthToken();
-  const handleLogout = () => {
+  const { setToken, token, sessionName, setSessionName, isAuthenticated } = useAuthToken();
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // ignore logout errors
+    }
     setToken(null);
-    localStorage.removeItem('refreshToken'); // 로컬 스토리지도 제거
+    setSessionName(null);
+    localStorage.removeItem('refreshToken');
     navigate('/');
   };
 
@@ -70,14 +77,19 @@ const AppLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {isAuthenticated && (
+              <span className="text-sm font-medium text-slate-600">
+                {"'"+`${sessionName && sessionName.length > 0 ? sessionName : '회원'}'님 환영합니다!`}
+              </span>
+            )}
             <nav className="flex items-center gap-3">
-              {token && (
+              {isAuthenticated && (
                   <NavLink to="/my-resumes" className={navLinkClass}>
                     내 이력서
                   </NavLink>
               )}
             </nav>
-            {!token ? (
+            {!isAuthenticated ? (
                 <button
                     type="button"
                     onClick={handleOpenLogin}

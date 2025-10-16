@@ -18,8 +18,8 @@ public record CustomUserDetails(Member member) implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
-    } // OAuth 기반이라면 null
+        return member.getPassword();
+    }
 
     @Override
     public String getUsername() {
