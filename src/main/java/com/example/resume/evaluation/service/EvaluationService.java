@@ -18,6 +18,7 @@ import com.example.resume.user.domain.Member;
 import com.example.resume.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,7 @@ public class EvaluationService {
         if(resume.getMember().getId().equals(memberId)){
             throw new CustomException(CURRENT_USER_EQUALS_RESUME_OWNER);
         }
-        ResumeInteraction resumeInteraction = resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, memberId);
+        ResumeInteraction resumeInteraction = validateResumeInteraction(resumeId, memberId, resume, member);
         resumeInteraction.markEvaluated();
 
         Evaluation evaluation = Evaluation.builder()
@@ -105,5 +106,18 @@ public class EvaluationService {
             //emailService.sendReviewNotification(toEmail, resumeTitle);
             applicationEventPublisher.publishEvent(new EmailNotificationEvent(toEmail, resumeTitle));
         }
+    }
+
+    @NotNull
+    private ResumeInteraction validateResumeInteraction(Long resumeId, Long memberId, Resume resume, Member member) {
+        ResumeInteraction resumeInteraction = resumeInteractionQueryDSLRepository.getResumeInteraction(memberId, resumeId);
+        if(resumeInteraction == null){
+            resumeInteraction = ResumeInteraction.builder()
+                    .resume(resume)
+                    .member(member)
+                    .build();
+            resumeInteractionRepository.save(resumeInteraction);
+        }
+        return resumeInteraction;
     }
 }

@@ -113,7 +113,7 @@ public class ResumeService {
             Long resumeOwnerId = resume.getMember().getId();
 
             ResumeInteraction resumeInteraction =
-                    resumeInteractionQueryDSLRepository.getResumeInteraction(resumeId, resolvedMemberId);
+                    resumeInteractionQueryDSLRepository.getResumeInteraction(resolvedMemberId, resumeId);
             if (resumeInteraction == null && !resumeOwnerId.equals(resolvedMemberId)) {
                 ResumeInteraction savedResumeInteraction = ResumeInteraction.builder()
                         .member(member)
