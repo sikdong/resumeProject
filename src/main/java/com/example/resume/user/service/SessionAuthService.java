@@ -76,12 +76,13 @@ public class SessionAuthService {
         if (session != null) {
             session.invalidate();
         }
+        boolean secureRequest = httpRequest.isSecure();
         ResponseCookie deleteCookie = ResponseCookie.from(SessionConstants.MEMBER_COOKIE_NAME, "")
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite(secureRequest ? "None" : "Lax")
                 .httpOnly(false)
-                .secure(httpRequest.isSecure())
+                .secure(secureRequest)
                 .build();
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
         SecurityContextHolder.clearContext();
@@ -112,12 +113,13 @@ public class SessionAuthService {
     }
 
     private static void makeCustomCookie(HttpServletRequest request, HttpServletResponse response, String encodedName) {
+        boolean secureRequest = request.isSecure();
         ResponseCookie cookie = ResponseCookie.from(SessionConstants.MEMBER_COOKIE_NAME, encodedName)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite("Lax")
+                .sameSite(secureRequest ? "None" : "Lax")
                 .httpOnly(false)
-                .secure(request.isSecure())
+                .secure(secureRequest)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
