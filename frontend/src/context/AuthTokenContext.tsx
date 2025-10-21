@@ -10,6 +10,8 @@ type AuthTokenContextValue = {
   isAuthenticated: boolean;
 };
 
+const ACCESS_TOKEN_KEY = 'accessToken';
+
 const readCookie = (name: string) => {
   if (typeof document === 'undefined') {
     return null;
@@ -27,15 +29,27 @@ const readCookie = (name: string) => {
   }
 };
 
+const readAccessToken = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  try {
+    const value = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (!value) {
+      return null;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  } catch {
+    return null;
+  }
+};
+
 const AuthTokenContext = createContext<AuthTokenContextValue | undefined>(undefined);
 
 export const AuthTokenProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem('accessToken');
-    } catch {
-      return null;
-    }
+    return readAccessToken();
   });
   const [sessionName, setSessionName] = useState<string | null>(() => readCookie('wishyMemberName'));
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -52,6 +66,21 @@ export const AuthTokenProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    const handleAccessTokenUpdate = (event: Event) => {
+      if (event instanceof CustomEvent) {
+        const detail = typeof event.detail === 'string' ? event.detail : null;
+        setTokenState(detail);
+        return;
+      }
+      setTokenState(readAccessToken());
+    };
+
+    window.addEventListener('wishy:access-token-updated', handleAccessTokenUpdate as EventListener);
+    return () =>
+      window.removeEventListener('wishy:access-token-updated', handleAccessTokenUpdate as EventListener);
+  }, []);
+
+  useEffect(() => {
     setSessionName(readCookie('wishyMemberName'));
   }, []);
 
@@ -59,9 +88,9 @@ export const AuthTokenProvider = ({ children }: { children: ReactNode }) => {
     setTokenState(value);
     try {
       if (value && value.trim().length > 0) {
-        localStorage.setItem('accessToken', value.trim());
+        localStorage.setItem(ACCESS_TOKEN_KEY, value.trim());
       } else {
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
       }
     } catch {
       // ignore storage errors
