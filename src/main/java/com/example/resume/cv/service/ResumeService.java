@@ -70,7 +70,7 @@ public class ResumeService {
         }
         Set<Long> keys = resumeInteractionMap.keySet();
 
-        List<ResumeResponseDto> resumeResponseDtos = getResumeResponseDtos(resumesWithEvaluation);
+        List<ResumeResponseDto> resumeResponseDtos = getResumeResponseDtos(resumesWithEvaluation, memberId);
 
         for (ResumeResponseDto resumeResponseDto : resumeResponseDtos) {
             Long resumeId = resumeResponseDto.getId();
@@ -126,7 +126,7 @@ public class ResumeService {
         }
 
         resumeViewManager.processViewCount(resumeId, resolvedMemberId, clientIp);
-        return buildResumeResponseDto(resume);
+        return buildResumeResponseDto(resume, resolvedMemberId);
     }
 
     @Transactional(readOnly = true)
@@ -139,7 +139,7 @@ public class ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeResponseDto> getMyResumes(Long memberId) {
         List<Resume> resumes = resumeRepository.findByMemberIdWithEvaluation(memberId);
-        return getResumeResponseDtos(resumes);
+        return getResumeResponseDtos(resumes, memberId);
     }
 
     @Transactional
@@ -221,10 +221,10 @@ public class ResumeService {
         }
     }
 
-    private ResumeResponseDto buildResumeResponseDto(Resume resume) {
+    private ResumeResponseDto buildResumeResponseDto(Resume resume, Long currentMemberId) {
         List<Evaluation> evaluations = resume.getEvaluations();
         List<EvaluationSummaryResponseDto> evaluationDtos = evaluations.stream()
-                .map(EvaluationSummaryResponseDto::fromEntity)
+                .map(evaluation -> EvaluationSummaryResponseDto.fromEntity(evaluation, currentMemberId))
                 .toList();
 
         double averageScore = calculateAverageScore(evaluations);
@@ -268,9 +268,9 @@ public class ResumeService {
         return Math.round(average * 10) / 10.0;
     }
 
-    private List<ResumeResponseDto> getResumeResponseDtos(List<Resume> resumesWithEvaluation) {
+    private List<ResumeResponseDto> getResumeResponseDtos(List<Resume> resumesWithEvaluation, Long currentMemberId) {
         return resumesWithEvaluation.stream()
-                .map(this::buildResumeResponseDto)
+                .map(resume -> buildResumeResponseDto(resume, currentMemberId))
                 .toList();
     }
 }

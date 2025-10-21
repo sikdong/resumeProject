@@ -48,7 +48,7 @@ const ResumeCard = ({ resume, onSelect, isActive }: ResumeCardProps) => (
         </span>
         <span className="inline-flex items-center gap-1">
           <b>
-            {resume.isEvaluated && "평가 했어요"}
+            {resume.isEvaluated && "평가했어요"}
           </b>
         </span>
       </div>

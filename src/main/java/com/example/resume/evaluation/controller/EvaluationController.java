@@ -30,8 +30,11 @@ public class EvaluationController {
     }
 
     @DeleteMapping("/evaluations/{evaluationId}")
-    public ResponseEntity<Void> deleteEvaluation(@PathVariable Long evaluationId) {
-        evaluationService.deleteEvaluation(evaluationId);
+    public ResponseEntity<Void> deleteEvaluation(
+            @PathVariable Long evaluationId,
+            Authentication authentication) {
+        Long memberId = MemberUtil.getMemberId(authentication);
+        evaluationService.deleteEvaluation(evaluationId, memberId);
         return ResponseEntity.noContent().build();
     }
 

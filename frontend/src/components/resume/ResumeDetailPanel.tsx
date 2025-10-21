@@ -139,7 +139,9 @@ const ResumeDetailPanel = ({
               <EvaluationItem
                 key={evaluation.id}
                 evaluation={evaluation}
-                canDelete={isAuthenticated && Boolean(onDeleteEvaluation)}
+                canDelete={
+                  Boolean(onDeleteEvaluation) && isAuthenticated && Boolean(evaluation.ownedByCurrentMember)
+                }
                 onDelete={(id) => onDeleteEvaluation?.(id)}
               />
             ))}

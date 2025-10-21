@@ -4,6 +4,7 @@ export interface EvaluationSummary {
   evaluatedAt: string;
   comment: string | null;
   memberName: string;
+  ownedByCurrentMember: boolean;
 }
 
 export interface EvaluationDto {

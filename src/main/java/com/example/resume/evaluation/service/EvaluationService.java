@@ -26,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.example.resume.exception.ErrorCode.CURRENT_USER_EQUALS_RESUME_OWNER;
+import static com.example.resume.exception.ErrorCode.EVALUATION_NOT_FOUND;
 import static com.example.resume.exception.ErrorCode.RESUME_NOT_FOUND;
+import static com.example.resume.exception.ErrorCode.UNAUTHORIZED_EVALUATION_ACCESS;
 import static com.example.resume.exception.ErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -66,8 +68,15 @@ public class EvaluationService {
     }
 
     @Transactional
-    public void deleteEvaluation(Long evaluationId) {
-        evaluationRepository.deleteById(evaluationId);
+    public void deleteEvaluation(Long evaluationId, Long memberId) {
+        Evaluation evaluation = evaluationRepository.findById(evaluationId)
+                .orElseThrow(() -> new CustomException(EVALUATION_NOT_FOUND));
+
+        if (!evaluation.getEvaluator().getId().equals(memberId)) {
+            throw new CustomException(UNAUTHORIZED_EVALUATION_ACCESS);
+        }
+
+        evaluationRepository.delete(evaluation);
     }
 
     @Transactional
