@@ -114,6 +114,7 @@ public class SessionAuthService {
 
     private static void makeCustomCookie(HttpServletRequest request, HttpServletResponse response, String encodedName) {
         ResponseCookie cookie = ResponseCookie.from(SessionConstants.MEMBER_COOKIE_NAME, encodedName)
+                .domain("evalume.store")
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .sameSite("None")
