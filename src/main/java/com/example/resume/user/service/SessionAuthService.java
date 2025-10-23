@@ -113,13 +113,12 @@ public class SessionAuthService {
     }
 
     private static void makeCustomCookie(HttpServletRequest request, HttpServletResponse response, String encodedName) {
-        boolean secureRequest = request.isSecure();
         ResponseCookie cookie = ResponseCookie.from(SessionConstants.MEMBER_COOKIE_NAME, encodedName)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite(secureRequest ? "None" : "Lax")
+                .sameSite("None")
                 .httpOnly(false)
-                .secure(secureRequest)
+                .secure(true)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
