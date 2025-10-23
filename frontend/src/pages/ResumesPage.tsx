@@ -80,8 +80,8 @@ const ResumesPage = () => {
 
   const openResumeDetail = async (resumeId: number) => {
     if (typeof window === 'undefined') return;
-    window.open(`/resumes/${resumeId}`, '_blank', 'noopener,noreferrer');
     await refreshRecentlyViewed();
+    window.location.href = `/resumes/${resumeId}`;
   };
 
   const handleUploadSuccess = async () => {
