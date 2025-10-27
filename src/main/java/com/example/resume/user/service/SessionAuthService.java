@@ -28,6 +28,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -113,14 +114,31 @@ public class SessionAuthService {
     }
 
     private static void makeCustomCookie(HttpServletRequest request, HttpServletResponse response, String encodedName) {
-        ResponseCookie cookie = ResponseCookie.from(SessionConstants.MEMBER_COOKIE_NAME, encodedName)
-                .domain("evalume.store")
+        String serverName = request.getServerName();
+        boolean secureRequest = request.isSecure();
+        boolean isLocal = isLocalHost(serverName);
+
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(SessionConstants.MEMBER_COOKIE_NAME, encodedName)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite("None")
+                .sameSite(isLocal? "Lax" : "None")
                 .httpOnly(false)
-                .secure(true)
-                .build();
+                .secure(secureRequest);
+
+        if (!isLocal) {
+            builder.domain("evalume.store");
+        }
+
+        ResponseCookie cookie = builder.build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    private static boolean isLocalHost(String host) {
+        if (host == null || host.isBlank()) {
+            return false;
+        }
+
+        String normalized = host.toLowerCase(Locale.ROOT);
+        return normalized.equals("localhost");
     }
 }
